@@ -15,14 +15,32 @@ Your friends can recover your secrets with nothing but a web browser and their b
 **[Download demo bundles](https://github.com/eljojo/rememory/releases/download/v0.0.2/demo-bundles.zip)** to try the recovery tool yourself. See the **[User Guide](docs/guide.md)** for a complete tutorial.
 
 ```mermaid
-graph TD
-    A[Open recover.html] --> B[Drop Alice's README.txt]
-    B --> C[Drop Bob's README.txt]
-    C --> D[Drop Carol's README.txt]
-    D --> E{3 of 5 shares collected}
-    E -->|Threshold met| F[Automatic decryption]
-    F --> G[Download recovered files]
+graph TB
+    subgraph seal["① SEAL (you do this once)"]
+        A[Your Secrets] --> B[Encrypt with age]
+        B --> C[Split key into 5 shares]
+        C --> D1[Alice's bundle]
+        C --> D2[Bob's bundle]
+        C --> D3[Carol's bundle]
+        C --> D4[David's bundle]
+        C --> D5[Eve's bundle]
+    end
+
+    subgraph recover["② RECOVER (friends do this together)"]
+        R1[Alice opens recover.html] --> R2[Drops her README.txt]
+        R2 --> R3[Bob drops his README.txt]
+        R3 --> R4[Carol drops her README.txt]
+        R4 --> R5{3 of 5 shares}
+        R5 -->|Threshold met| R6[Key reconstructed]
+        R6 --> R7[Secrets decrypted]
+    end
+
+    D1 -.-> R1
+    D2 -.-> R3
+    D3 -.-> R4
 ```
+
+The key insight: **any 3 shares can reconstruct the key, but 2 shares reveal nothing**—not "very little," mathematically zero information.
 
 ## Quick Start
 
@@ -108,72 +126,7 @@ Send each friend their bundle. Each bundle contains:
 
 **A single share reveals absolutely nothing.** But tell your friends to keep their bundle safe anyway—it's their responsibility to you.
 
-## How It Works
-
-### What Your Friends Do (Recovery)
-
-When the time comes, your friends gather and use `recover.html`:
-
-```mermaid
-sequenceDiagram
-    participant Alice
-    participant Bob
-    participant Carol
-    participant Browser as recover.html
-    participant WASM as Go WASM
-
-    Alice->>Browser: Opens recover.html
-    Alice->>Browser: Drops README.txt (contains her share)
-    Bob->>Browser: Drops README.txt (contains his share)
-    Carol->>Browser: Drops README.txt (contains her share)
-    Browser->>WASM: Combine 3 shares
-    WASM-->>Browser: Reconstructed passphrase
-    Browser->>WASM: Decrypt MANIFEST.age
-    WASM-->>Browser: Decrypted files
-    Browser-->>Alice: Download recovered files
-```
-
-Everything happens locally in the browser. No data leaves their computer.
-
-### What You Do (Sealing)
-
-When you run `rememory seal`:
-
-```mermaid
-sequenceDiagram
-    participant You
-    participant ReMemory
-    participant Age as age encryption
-    participant Shamir as Shamir's Secret Sharing
-
-    You->>ReMemory: rememory seal
-    ReMemory->>ReMemory: Generate random 256-bit passphrase
-    ReMemory->>Age: Encrypt manifest/ folder
-    Age-->>ReMemory: MANIFEST.age
-    ReMemory->>Shamir: Split passphrase (3-of-5)
-    Shamir-->>ReMemory: 5 unique shares
-    ReMemory->>ReMemory: Create share files with checksums
-    ReMemory-->>You: Ready to distribute!
-```
-
-### How Shamir's Secret Sharing Works
-
-```mermaid
-graph LR
-    A[Your Secrets] --> B[Encrypt with age]
-    B --> C[Split key into 5 shares]
-    C --> D1[Alice gets share 1]
-    C --> D2[Bob gets share 2]
-    C --> D3[Carol gets share 3]
-    C --> D4[David gets share 4]
-    C --> D5[Eve gets share 5]
-
-    D1 & D2 & D3 -.->|Any 3 of 5| E[Reconstruct key]
-    E --> F[Decrypt secrets]
-```
-
-The key insight: any 3 shares can reconstruct the key, but 2 shares reveal nothing. Not "very little"—mathematically zero information.
-
+## FAQ
 
 <details>
 <summary>Why ReMemory?</summary>
@@ -293,6 +246,7 @@ rememory recover \
   --manifest MANIFEST.age \
   --output recovered/
 ```
+See the **[User Guide](docs/guide.md)** for a complete tutorial.
 
 </details>
 
@@ -332,6 +286,8 @@ ReMemory does NOT rely on:
 - Any ReMemory website or infrastructure
 - Any long-term availability of this project
 - The internet during recovery
+
+See the **[Security Audit](docs/security-audit.md)** for an overview on security.
 
 </details>
 
