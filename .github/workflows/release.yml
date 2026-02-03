@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Build WASM
+        run: make wasm
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build binaries
+        run: make build-all
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/rememory-linux-amd64
+            dist/rememory-linux-arm64
+            dist/rememory-darwin-amd64
+            dist/rememory-darwin-arm64
+            dist/rememory-windows-amd64.exe
+            dist/checksums.txt
+          generate_release_notes: true
