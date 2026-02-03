@@ -26,7 +26,8 @@
           version = "0.1.0";
           src = ./.;
 
-          vendorHash = null; # Uses go.sum
+          vendorHash = "sha256-u11OiL0ZRo1eTh3jcYp1e92vKRGpFav7N8Vc1HrnO40=";
+          proxyVendor = true; # Download deps during build instead of vendoring
 
           # Build WASM first
           preBuild = ''
@@ -44,6 +45,7 @@
       in
       {
         packages = {
+          rememory = rememory;
           default = rememory;
 
           e2e-tests = pkgs.buildNpmPackage {
@@ -86,6 +88,11 @@
               fi
             '';
           };
+        };
+
+        apps = {
+          rememory = flake-utils.lib.mkApp { drv = rememory; };
+          default = flake-utils.lib.mkApp { drv = rememory; };
         };
 
         checks = {
