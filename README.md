@@ -334,7 +334,9 @@ make build-all    # Cross-compile for all platforms
 
 ## License
 
-MIT
+Apache-2.0
+
+Copyright 2026 José Albornoz
 
 ## Credits
 
