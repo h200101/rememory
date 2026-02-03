@@ -42,6 +42,9 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	pdf.SetAutoPageBreak(true, 20)
 	pdf.AddPage()
 
+	// Translator for UTF-8 characters (Spanish accents, etc.)
+	tr := pdf.UnicodeTranslatorFromDescriptor("")
+
 	// Title
 	pdf.SetFont("Helvetica", "B", titleSize)
 	pdf.CellFormat(0, 10, "REMEMORY RECOVERY BUNDLE", "", 1, "C", false, 0, "")
@@ -60,13 +63,35 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	pdf.CellFormat(0, 7, "  !! CONFIDENTIAL - DO NOT SHARE THIS FILE", "", 1, "L", true, 0, "")
 	pdf.SetFont("Helvetica", "", bodySize)
 	pdf.CellFormat(0, 5, "  This document contains your secret share. Keep it safe.", "", 1, "L", true, 0, "")
-	pdf.Ln(8)
+	pdf.Ln(3)
+
+	// Spanish AI help note (green background, right after warning)
+	pdf.SetFillColor(220, 245, 220)
+	pdf.SetFont("Helvetica", "B", bodySize)
+	pdf.CellFormat(0, 6, "  NOTA PARA HISPANOHABLANTES", "", 1, "L", true, 0, "")
+	pdf.SetFont("Helvetica", "I", bodySize)
+	pdf.MultiCell(0, 5, tr("  Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial para que te ayude a entender estas instrucciones y recuperar los datos. Copia este documento completo y pídele a la IA que te explique los pasos. La herramienta recover.html también está disponible en español."), "", "L", true)
+	pdf.Ln(5)
 
 	// Section: What is this?
 	addSection(pdf, "WHAT IS THIS?")
 	addBody(pdf, fmt.Sprintf("This bundle allows you to help recover encrypted secrets for: %s", data.ProjectName))
 	addBody(pdf, fmt.Sprintf("You are one of %d trusted friends who hold pieces of the recovery key.", data.Total))
 	addBody(pdf, fmt.Sprintf("At least %d of you must cooperate to decrypt the contents.", data.Threshold))
+	pdf.Ln(5)
+
+	// Section: Other share holders (right after What is this?)
+	addSection(pdf, "OTHER SHARE HOLDERS (contact to coordinate recovery)")
+	for _, friend := range data.OtherFriends {
+		pdf.SetFont("Helvetica", "B", bodySize)
+		pdf.CellFormat(0, 6, friend.Name, "", 1, "L", false, 0, "")
+		pdf.SetFont("Helvetica", "", bodySize)
+		pdf.CellFormat(0, 5, fmt.Sprintf("    Email: %s", friend.Email), "", 1, "L", false, 0, "")
+		if friend.Phone != "" {
+			pdf.CellFormat(0, 5, fmt.Sprintf("    Phone: %s", friend.Phone), "", 1, "L", false, 0, "")
+		}
+		pdf.Ln(2)
+	}
 	pdf.Ln(5)
 
 	// Section: Browser recovery
@@ -105,26 +130,6 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 			pdf.Ln(2)
 		}
 	}
-	pdf.Ln(5)
-
-	// Section: Other share holders
-	addSection(pdf, "OTHER SHARE HOLDERS (contact to coordinate recovery)")
-	for _, friend := range data.OtherFriends {
-		pdf.SetFont("Helvetica", "B", bodySize)
-		pdf.CellFormat(0, 6, friend.Name, "", 1, "L", false, 0, "")
-		pdf.SetFont("Helvetica", "", bodySize)
-		pdf.CellFormat(0, 5, fmt.Sprintf("    Email: %s", friend.Email), "", 1, "L", false, 0, "")
-		if friend.Phone != "" {
-			pdf.CellFormat(0, 5, fmt.Sprintf("    Phone: %s", friend.Phone), "", 1, "L", false, 0, "")
-		}
-		pdf.Ln(2)
-	}
-	pdf.Ln(5)
-
-	// Spanish AI help note
-	addSection(pdf, "NOTA PARA HISPANOHABLANTES")
-	pdf.SetFont("Helvetica", "I", bodySize)
-	pdf.MultiCell(0, 5, "Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial para que te ayude a entender estas instrucciones y recuperar los datos. Copia este documento completo y pidele a la IA que te explique los pasos. La herramienta recover.html tambien esta disponible en español.", "", "L", false)
 	pdf.Ln(5)
 
 	// Footer: Metadata

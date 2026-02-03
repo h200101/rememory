@@ -40,6 +40,13 @@ func GenerateReadme(data ReadmeData) string {
 	sb.WriteString("!!  CONFIDENTIAL - DO NOT SHARE THIS FILE\n")
 	sb.WriteString("    This document contains your secret share. Keep it safe.\n\n")
 
+	// AI help note (in Spanish for non-English speakers) - right after warning
+	sb.WriteString("    NOTA PARA HISPANOHABLANTES:\n")
+	sb.WriteString("    Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial\n")
+	sb.WriteString("    para que te ayude a entender estas instrucciones y recuperar los datos.\n")
+	sb.WriteString("    Copia este documento completo y pídele a la IA que te explique los pasos.\n")
+	sb.WriteString("    La herramienta recover.html también está disponible en español.\n\n")
+
 	// What is this
 	sb.WriteString("--------------------------------------------------------------------------------\n")
 	sb.WriteString("WHAT IS THIS?\n")
@@ -47,6 +54,19 @@ func GenerateReadme(data ReadmeData) string {
 	sb.WriteString(fmt.Sprintf("This bundle allows you to help recover encrypted secrets for: %s\n", data.ProjectName))
 	sb.WriteString(fmt.Sprintf("You are one of %d trusted friends who hold pieces of the recovery key.\n", data.Total))
 	sb.WriteString(fmt.Sprintf("At least %d of you must cooperate to decrypt the contents.\n\n", data.Threshold))
+
+	// Other share holders - right after What is this
+	sb.WriteString("--------------------------------------------------------------------------------\n")
+	sb.WriteString("OTHER SHARE HOLDERS (contact to coordinate recovery)\n")
+	sb.WriteString("--------------------------------------------------------------------------------\n")
+	for _, friend := range data.OtherFriends {
+		sb.WriteString(fmt.Sprintf("%s\n", friend.Name))
+		sb.WriteString(fmt.Sprintf("  Email: %s\n", friend.Email))
+		if friend.Phone != "" {
+			sb.WriteString(fmt.Sprintf("  Phone: %s\n", friend.Phone))
+		}
+		sb.WriteString("\n")
+	}
 
 	// Primary method - Browser
 	sb.WriteString("--------------------------------------------------------------------------------\n")
@@ -73,28 +93,6 @@ func GenerateReadme(data ReadmeData) string {
 	sb.WriteString("--------------------------------------------------------------------------------\n")
 	sb.WriteString(data.Share.Encode())
 	sb.WriteString("\n")
-
-	// Other share holders
-	sb.WriteString("--------------------------------------------------------------------------------\n")
-	sb.WriteString("OTHER SHARE HOLDERS (contact to coordinate recovery)\n")
-	sb.WriteString("--------------------------------------------------------------------------------\n")
-	for _, friend := range data.OtherFriends {
-		sb.WriteString(fmt.Sprintf("%s\n", friend.Name))
-		sb.WriteString(fmt.Sprintf("  Email: %s\n", friend.Email))
-		if friend.Phone != "" {
-			sb.WriteString(fmt.Sprintf("  Phone: %s\n", friend.Phone))
-		}
-		sb.WriteString("\n")
-	}
-
-	// AI help note (in Spanish for non-English speakers)
-	sb.WriteString("--------------------------------------------------------------------------------\n")
-	sb.WriteString("NOTA PARA HISPANOHABLANTES\n")
-	sb.WriteString("--------------------------------------------------------------------------------\n")
-	sb.WriteString("Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial\n")
-	sb.WriteString("para que te ayude a entender estas instrucciones y recuperar los datos.\n")
-	sb.WriteString("Copia este documento completo y pídele a la IA que te explique los pasos.\n")
-	sb.WriteString("La herramienta recover.html también está disponible en español.\n\n")
 
 	// Metadata footer
 	sb.WriteString("================================================================================\n")
