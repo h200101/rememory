@@ -74,7 +74,7 @@
           console.error('Embedded WASM failed:', e);
         }
       }
-      showError('Failed to load recovery module: ' + err.message);
+      showError(t('error', err.message));
     }
   }
 
@@ -154,7 +154,7 @@
   // Handle bundle ZIP file - extract share and optionally manifest
   async function handleBundleZip(file) {
     if (!state.wasmReady) {
-      showError('Recovery module not ready');
+      showError(t('error', 'Recovery module not ready'));
       return;
     }
 
@@ -163,7 +163,7 @@
 
     const result = window.rememoryExtractBundle(zipData);
     if (result.error) {
-      showError('Failed to extract bundle: ' + result.error);
+      showError(t('error', result.error));
       return;
     }
 
@@ -172,7 +172,7 @@
 
     // Check for duplicate index
     if (state.shares.some(s => s.index === share.index)) {
-      showError('Duplicate share (index ' + share.index + ') already added');
+      showError(t('duplicate', share.index));
       return;
     }
 
@@ -191,7 +191,7 @@
       elements.manifestStatus.innerHTML = `
         <span class="icon">&#9989;</span>
         <div>
-          <strong>MANIFEST.age</strong> loaded from bundle
+          <strong>MANIFEST.age</strong> ${t('manifest_loaded_bundle')}
           <div style="font-size: 0.875rem; color: #6c757d;">${formatSize(state.manifest.length)}</div>
         </div>
       `;
@@ -204,19 +204,19 @@
 
   async function parseAndAddShare(content, filename) {
     if (!state.wasmReady) {
-      showError('Recovery module not ready');
+      showError(t('error', 'Recovery module not ready'));
       return;
     }
 
     // Check if content contains a share
     if (!shareRegex.test(content)) {
-      showError('No share found in ' + filename);
+      showError(t('no_share', filename));
       return;
     }
 
     const result = window.rememoryParseShare(content);
     if (result.error) {
-      showError('Invalid share in ' + filename + ': ' + result.error);
+      showError(t('invalid_share', filename, result.error));
       return;
     }
 
@@ -224,7 +224,7 @@
 
     // Check for duplicate index
     if (state.shares.some(s => s.index === share.index)) {
-      showError('Duplicate share (index ' + share.index + ') already added');
+      showError(t('duplicate', share.index));
       return;
     }
 
@@ -249,9 +249,9 @@
         <span class="icon">&#9989;</span>
         <div class="details">
           <div class="name">${escapeHtml(share.holder || 'Share ' + share.index)}</div>
-          <div class="meta">Index ${share.index} of ${share.total}</div>
+          <div class="meta">${t('share_index', share.index, share.total)}</div>
         </div>
-        <button class="remove" data-idx="${idx}" title="Remove">&times;</button>
+        <button class="remove" data-idx="${idx}" title="${t('remove')}">&times;</button>
       `;
       elements.sharesList.appendChild(item);
     });
@@ -274,8 +274,8 @@
     if (state.threshold > 0) {
       const needed = Math.max(0, state.threshold - state.shares.length);
       elements.thresholdInfo.innerHTML = needed > 0
-        ? `&#128274; Need ${needed} more share${needed > 1 ? 's' : ''} (${state.shares.length} of ${state.threshold} required)`
-        : `&#9989; Ready to recover! (${state.shares.length} of ${state.threshold} shares)`;
+        ? `&#128274; ${t('need_more', needed)} (${t('shares_of', state.shares.length, state.threshold)})`
+        : `&#9989; ${t('ready')} (${t('shares_of', state.shares.length, state.threshold)})`;
       elements.thresholdInfo.className = 'threshold-info' + (needed === 0 ? ' ready' : '');
       elements.thresholdInfo.classList.remove('hidden');
     } else {
@@ -302,7 +302,7 @@
       elements.manifestStatus.innerHTML = `
         <span class="icon">&#9989;</span>
         <div>
-          <strong>${escapeHtml(file.name)}</strong> loaded
+          <strong>${escapeHtml(file.name)}</strong> ${t('loaded')}
           <div style="font-size: 0.875rem; color: #6c757d;">${formatSize(state.manifest.length)}</div>
         </div>
       `;
@@ -310,7 +310,7 @@
       elements.manifestStatus.classList.add('loaded');
       checkRecoverReady();
     } catch (err) {
-      showError('Error reading manifest: ' + err.message);
+      showError(t('error', err.message));
     }
   }
 
@@ -341,7 +341,7 @@
     try {
       // Step 1: Combine shares
       setProgress(10);
-      setStatus('Combining shares...');
+      setStatus(t('combining'));
 
       const sharesForCombine = state.shares.map(s => ({
         index: s.index,
@@ -350,17 +350,17 @@
 
       const combineResult = window.rememoryCombineShares(sharesForCombine);
       if (combineResult.error) {
-        throw new Error('Failed to combine shares: ' + combineResult.error);
+        throw new Error(combineResult.error);
       }
 
       const passphrase = combineResult.passphrase;
       setProgress(30);
 
       // Step 2: Decrypt manifest
-      setStatus('Decrypting manifest...');
+      setStatus(t('decrypting'));
       const decryptResult = window.rememoryDecryptManifest(state.manifest, passphrase);
       if (decryptResult.error) {
-        throw new Error('Failed to decrypt: ' + decryptResult.error);
+        throw new Error(decryptResult.error);
       }
 
       setProgress(60);
@@ -369,10 +369,10 @@
       state.decryptedArchive = decryptResult.data;
 
       // Step 3: Extract tar.gz to show file list (preview only)
-      setStatus('Reading archive contents...');
+      setStatus(t('reading'));
       const extractResult = window.rememoryExtractTarGz(decryptResult.data);
       if (extractResult.error) {
-        throw new Error('Failed to read archive: ' + extractResult.error);
+        throw new Error(extractResult.error);
       }
 
       setProgress(90);
@@ -392,11 +392,11 @@
       });
 
       setProgress(100);
-      setStatus('Recovery complete! ' + files.length + ' file(s) in archive.', 'success');
+      setStatus(t('complete', files.length), 'success');
       elements.downloadActions.classList.remove('hidden');
 
     } catch (err) {
-      setStatus('Error: ' + err.message, 'error');
+      setStatus(t('error', err.message), 'error');
     } finally {
       state.recovering = false;
       elements.recoverBtn.disabled = false;

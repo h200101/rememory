@@ -5,28 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReMemory Recovery Tool</title>
   <style>{{STYLES}}</style>
+  <style>
+    .lang-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .lang-toggle button {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .lang-toggle button.active {
+      background: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+    .lang-toggle button:hover:not(.active) {
+      background: #f0f0f0;
+    }
+    header {
+      position: relative;
+    }
+  </style>
 </head>
 <body>
   <!-- Loading overlay -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="spinner"></div>
-    <p style="margin-top: 1rem; color: #7f8c8d;">Loading recovery module...</p>
+    <p style="margin-top: 1rem; color: #7f8c8d;" data-i18n="loading">Loading recovery module...</p>
   </div>
 
   <div class="container">
     <header>
-      <h1>ReMemory Recovery</h1>
-      <p>Recover your encrypted files using Shamir's Secret Sharing</p>
+      <div class="lang-toggle">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="es">ES</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="fr">FR</button>
+      </div>
+      <h1 data-i18n="title">ReMemory Recovery</h1>
+      <p data-i18n="subtitle">Recover your encrypted files using Shamir's Secret Sharing</p>
     </header>
 
     <!-- Step 1: Collect Shares -->
     <div class="card">
-      <h2><span class="step-number">1</span> Collect Shares</h2>
+      <h2><span class="step-number">1</span> <span data-i18n="step1_title">Collect Shares</span></h2>
       <div id="share-drop-zone" class="drop-zone">
-        <p>Drag & drop README.txt files here, or click to browse</p>
-        <small>Each README.txt contains the share for that person</small>
+        <p data-i18n="step1_drop">Drag & drop README.txt files here, or click to browse</p>
+        <small data-i18n="step1_hint">Each README.txt contains the share for that person</small>
       </div>
-      <input type="file" id="share-file-input" accept=".txt,.pdf" multiple>
+      <input type="file" id="share-file-input" accept=".txt,.pdf,.zip" multiple>
 
       <div id="shares-list" class="shares-list"></div>
 
@@ -35,25 +69,25 @@
 
     <!-- Step 2: Load Manifest -->
     <div class="card">
-      <h2><span class="step-number">2</span> Load Encrypted Manifest</h2>
+      <h2><span class="step-number">2</span> <span data-i18n="step2_title">Load Encrypted Manifest</span></h2>
       <div id="manifest-drop-zone" class="drop-zone">
-        <p>Drag & drop MANIFEST.age here, or click to browse</p>
-        <small>This is the encrypted file containing your secrets</small>
+        <p data-i18n="step2_drop">Drag & drop MANIFEST.age here, or click to browse</p>
+        <small data-i18n="step2_hint">This is the encrypted file containing your secrets</small>
       </div>
       <input type="file" id="manifest-file-input" accept=".age">
 
       <div id="manifest-status" class="manifest-status hidden">
         <span class="icon">&#128196;</span>
-        <div>No manifest loaded</div>
+        <div data-i18n="no_manifest">No manifest loaded</div>
       </div>
     </div>
 
     <!-- Step 3: Recover -->
     <div class="card">
-      <h2><span class="step-number">3</span> Recover Files</h2>
+      <h2><span class="step-number">3</span> <span data-i18n="step3_title">Recover Files</span></h2>
       <div id="recover-section" class="recover-section">
         <button id="recover-btn" class="btn btn-primary" disabled>
-          <span>&#128275;</span> Decrypt &amp; Recover
+          <span>&#128275;</span> <span data-i18n="decrypt_btn">Decrypt & Recover</span>
         </button>
 
         <div id="progress-bar" class="progress-bar hidden">
@@ -66,7 +100,7 @@
 
         <div id="download-actions" class="download-actions hidden">
           <button id="download-all-btn" class="btn btn-success">
-            <span>&#128229;</span> Download Archive (.tar.gz)
+            <span>&#128229;</span> <span data-i18n="download_btn">Download Archive (.tar.gz)</span>
           </button>
         </div>
       </div>
@@ -74,11 +108,193 @@
   </div>
 
   <footer>
-    <p>ReMemory v{{VERSION}} &mdash; Works completely offline</p>
+    <p>ReMemory v{{VERSION}} &mdash; <span data-i18n="works_offline">Works completely offline</span></p>
     <p>
-      Need help? <a href="{{GITHUB_URL}}" target="_blank">Download CLI tool from GitHub</a>
+      <span data-i18n="need_help">Need help?</span> <a href="{{GITHUB_URL}}" target="_blank" data-i18n="download_cli">Download CLI tool from GitHub</a>
     </p>
   </footer>
+
+  <!-- Translations -->
+  <script>
+    const translations = {
+      en: {
+        loading: "Loading recovery module...",
+        title: "ReMemory Recovery",
+        subtitle: "Recover your encrypted files using Shamir's Secret Sharing",
+        step1_title: "Collect Shares",
+        step1_drop: "Drag & drop README.txt files here, or click to browse",
+        step1_hint: "Each README.txt contains the share for that person",
+        step2_title: "Load Encrypted Manifest",
+        step2_drop: "Drag & drop MANIFEST.age here, or click to browse",
+        step2_hint: "This is the encrypted file containing your secrets",
+        step3_title: "Recover Files",
+        decrypt_btn: "Decrypt & Recover",
+        download_btn: "Download Archive (.tar.gz)",
+        no_manifest: "No manifest loaded",
+        works_offline: "Works completely offline",
+        need_help: "Need help?",
+        download_cli: "Download CLI tool from GitHub",
+        need_more: "Need {0} more share(s)",
+        ready: "Ready to recover!",
+        shares_of: "{0} of {1} shares",
+        share_index: "Index {0} of {1}",
+        remove: "Remove",
+        loaded: "loaded",
+        manifest_loaded_bundle: "loaded from bundle",
+        combining: "Combining shares...",
+        decrypting: "Decrypting manifest...",
+        reading: "Reading archive contents...",
+        complete: "Recovery complete! {0} file(s) in archive.",
+        error: "Error: {0}",
+        duplicate: "Duplicate share (index {0}) already added",
+        no_share: "No share found in {0}",
+        invalid_share: "Invalid share in {0}: {1}"
+      },
+      es: {
+        loading: "Cargando módulo de recuperación...",
+        title: "Recuperación ReMemory",
+        subtitle: "Recupera tus archivos encriptados usando el esquema de Shamir",
+        step1_title: "Recolectar Fragmentos",
+        step1_drop: "Arrastra archivos README.txt aquí, o haz clic para buscar",
+        step1_hint: "Cada README.txt contiene el fragmento de esa persona",
+        step2_title: "Cargar Manifiesto Encriptado",
+        step2_drop: "Arrastra MANIFEST.age aquí, o haz clic para buscar",
+        step2_hint: "Este es el archivo encriptado que contiene tus secretos",
+        step3_title: "Recuperar Archivos",
+        decrypt_btn: "Desencriptar y Recuperar",
+        download_btn: "Descargar Archivo (.tar.gz)",
+        no_manifest: "Ningún manifiesto cargado",
+        works_offline: "Funciona completamente sin internet",
+        need_help: "¿Necesitas ayuda?",
+        download_cli: "Descarga la herramienta CLI desde GitHub",
+        need_more: "Necesitas {0} fragmento(s) más",
+        ready: "¡Listo para recuperar!",
+        shares_of: "{0} de {1} fragmentos",
+        share_index: "Índice {0} de {1}",
+        remove: "Eliminar",
+        loaded: "cargado",
+        manifest_loaded_bundle: "cargado del paquete",
+        combining: "Combinando fragmentos...",
+        decrypting: "Desencriptando manifiesto...",
+        reading: "Leyendo contenido del archivo...",
+        complete: "¡Recuperación completa! {0} archivo(s) en el paquete.",
+        error: "Error: {0}",
+        duplicate: "Fragmento duplicado (índice {0}) ya fue agregado",
+        no_share: "No se encontró fragmento en {0}",
+        invalid_share: "Fragmento inválido en {0}: {1}"
+      },
+      de: {
+        loading: "Wiederherstellungsmodul wird geladen...",
+        title: "ReMemory Wiederherstellung",
+        subtitle: "Stellen Sie Ihre verschlüsselten Dateien mit Shamirs Secret Sharing wieder her",
+        step1_title: "Anteile sammeln",
+        step1_drop: "README.txt-Dateien hierher ziehen oder klicken zum Durchsuchen",
+        step1_hint: "Jede README.txt enthält den Anteil dieser Person",
+        step2_title: "Verschlüsseltes Manifest laden",
+        step2_drop: "MANIFEST.age hierher ziehen oder klicken zum Durchsuchen",
+        step2_hint: "Dies ist die verschlüsselte Datei mit Ihren Geheimnissen",
+        step3_title: "Dateien wiederherstellen",
+        decrypt_btn: "Entschlüsseln & Wiederherstellen",
+        download_btn: "Archiv herunterladen (.tar.gz)",
+        no_manifest: "Kein Manifest geladen",
+        works_offline: "Funktioniert komplett offline",
+        need_help: "Brauchen Sie Hilfe?",
+        download_cli: "CLI-Tool von GitHub herunterladen",
+        need_more: "Noch {0} Anteil(e) benötigt",
+        ready: "Bereit zur Wiederherstellung!",
+        shares_of: "{0} von {1} Anteilen",
+        share_index: "Index {0} von {1}",
+        remove: "Entfernen",
+        loaded: "geladen",
+        manifest_loaded_bundle: "aus Bundle geladen",
+        combining: "Anteile werden kombiniert...",
+        decrypting: "Manifest wird entschlüsselt...",
+        reading: "Archivinhalt wird gelesen...",
+        complete: "Wiederherstellung abgeschlossen! {0} Datei(en) im Archiv.",
+        error: "Fehler: {0}",
+        duplicate: "Doppelter Anteil (Index {0}) bereits hinzugefügt",
+        no_share: "Kein Anteil in {0} gefunden",
+        invalid_share: "Ungültiger Anteil in {0}: {1}"
+      },
+      fr: {
+        loading: "Chargement du module de récupération...",
+        title: "Récupération ReMemory",
+        subtitle: "Récupérez vos fichiers chiffrés en utilisant le partage de secret de Shamir",
+        step1_title: "Collecter les Parts",
+        step1_drop: "Glissez-déposez les fichiers README.txt ici, ou cliquez pour parcourir",
+        step1_hint: "Chaque README.txt contient la part de cette personne",
+        step2_title: "Charger le Manifeste Chiffré",
+        step2_drop: "Glissez-déposez MANIFEST.age ici, ou cliquez pour parcourir",
+        step2_hint: "C'est le fichier chiffré contenant vos secrets",
+        step3_title: "Récupérer les Fichiers",
+        decrypt_btn: "Déchiffrer & Récupérer",
+        download_btn: "Télécharger l'Archive (.tar.gz)",
+        no_manifest: "Aucun manifeste chargé",
+        works_offline: "Fonctionne entièrement hors ligne",
+        need_help: "Besoin d'aide ?",
+        download_cli: "Télécharger l'outil CLI depuis GitHub",
+        need_more: "Besoin de {0} part(s) supplémentaire(s)",
+        ready: "Prêt pour la récupération !",
+        shares_of: "{0} sur {1} parts",
+        share_index: "Index {0} sur {1}",
+        remove: "Supprimer",
+        loaded: "chargé",
+        manifest_loaded_bundle: "chargé depuis le bundle",
+        combining: "Combinaison des parts...",
+        decrypting: "Déchiffrement du manifeste...",
+        reading: "Lecture du contenu de l'archive...",
+        complete: "Récupération terminée ! {0} fichier(s) dans l'archive.",
+        error: "Erreur : {0}",
+        duplicate: "Part en double (index {0}) déjà ajoutée",
+        no_share: "Aucune part trouvée dans {0}",
+        invalid_share: "Part invalide dans {0} : {1}"
+      }
+    };
+
+    let currentLang = 'en';
+
+    function t(key, ...args) {
+      let text = translations[currentLang][key] || translations['en'][key] || key;
+      args.forEach((arg, i) => {
+        text = text.replace(`{${i}}`, arg);
+      });
+      return text;
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('rememory-lang', lang);
+
+      // Update toggle buttons
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+
+      // Update all translatable elements
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        el.textContent = t(key);
+      });
+
+      // Update page title
+      document.title = t('title');
+    }
+
+    // Initialize language toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      // Try to detect language from browser or localStorage
+      const saved = localStorage.getItem('rememory-lang');
+      const browserLang = navigator.language.split('-')[0];
+      const defaultLang = saved || (['es', 'de', 'fr'].includes(browserLang) ? browserLang : 'en');
+
+      setLanguage(defaultLang);
+
+      // Add click handlers
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+      });
+    });
+  </script>
 
   <!-- Go WASM runtime -->
   <script>{{WASM_EXEC}}</script>

@@ -121,6 +121,12 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	}
 	pdf.Ln(5)
 
+	// Spanish AI help note
+	addSection(pdf, "NOTA PARA HISPANOHABLANTES")
+	pdf.SetFont("Helvetica", "I", bodySize)
+	pdf.MultiCell(0, 5, "Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial para que te ayude a entender estas instrucciones y recuperar los datos. Copia este documento completo y pidele a la IA que te explique los pasos. La herramienta recover.html tambien esta disponible en español.", "", "L", false)
+	pdf.Ln(5)
+
 	// Footer: Metadata
 	pdf.SetFont("Helvetica", "B", monoSize)
 	pdf.CellFormat(0, 5, "METADATA", "", 1, "L", false, 0, "")

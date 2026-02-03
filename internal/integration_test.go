@@ -3,6 +3,7 @@ package integration_test
 import (
 	"archive/zip"
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -470,9 +471,11 @@ func verifyBundle(t *testing.T, bundlePath string, friend project.Friend, allFri
 		if err != nil {
 			t.Fatalf("opening %s: %v", f.Name, err)
 		}
-		data := make([]byte, f.UncompressedSize64)
-		rc.Read(data)
+		data, err := io.ReadAll(rc)
 		rc.Close()
+		if err != nil {
+			t.Fatalf("reading %s: %v", f.Name, err)
+		}
 
 		switch f.Name {
 		case "README.txt":

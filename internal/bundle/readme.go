@@ -87,6 +87,15 @@ func GenerateReadme(data ReadmeData) string {
 		sb.WriteString("\n")
 	}
 
+	// AI help note (in Spanish for non-English speakers)
+	sb.WriteString("--------------------------------------------------------------------------------\n")
+	sb.WriteString("NOTA PARA HISPANOHABLANTES\n")
+	sb.WriteString("--------------------------------------------------------------------------------\n")
+	sb.WriteString("Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial\n")
+	sb.WriteString("para que te ayude a entender estas instrucciones y recuperar los datos.\n")
+	sb.WriteString("Copia este documento completo y pídele a la IA que te explique los pasos.\n")
+	sb.WriteString("La herramienta recover.html también está disponible en español.\n\n")
+
 	// Metadata footer
 	sb.WriteString("================================================================================\n")
 	sb.WriteString("METADATA FOOTER (machine-parseable)\n")
