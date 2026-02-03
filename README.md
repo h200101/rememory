@@ -176,25 +176,7 @@ Send each friend their bundle. Each bundle contains:
 | `rememory verify-bundle <zip>` | Verify a bundle's integrity |
 | `rememory recover` | Recover secrets from shares |
 
-<details>
-<summary>Threat Model</summary>
-
-ReMemory assumes:
-- Your friends will only cooperate after you're gone (or when needed)
-- At least *threshold* friends will keep their bundle safe
-- Your computer is trusted at the time you run `seal`
-- The browser used for recovery is not compromised at recovery time
-
-ReMemory does NOT rely on:
-- Any server or cloud service
-- Any ReMemory website or infrastructure
-- Any long-term availability of this project
-- The internet during recovery
-
-</details>
-
-<details>
-<summary>How It Works</summary>
+## How It Works
 
 ### What Your Friends Do (Recovery)
 
@@ -260,36 +242,6 @@ graph LR
 
 The key insight: any 3 shares can reconstruct the key, but 2 shares reveal nothing. Not "very little"—mathematically zero information.
 
-</details>
-
-<details>
-<summary>Cryptographic Guarantees</summary>
-
-| Component | Algorithm |
-|-----------|-----------|
-| Encryption | [age](https://github.com/FiloSottile/age) (scrypt passphrase mode) |
-| Key derivation | scrypt (N=2²⁰, r=8, p=1) |
-| Secret sharing | Shamir's Secret Sharing over GF(2⁸) |
-| Integrity | SHA-256 checksums |
-| Passphrase | 256 bits from crypto/rand |
-
-**A single share reveals absolutely nothing about your secret, even to a cryptography expert.** This is a mathematical guarantee of Shamir's Secret Sharing—any fewer than *threshold* shares contains zero information about the original secret.
-
-</details>
-
-<details>
-<summary>Failure Scenarios</summary>
-
-| What if... | Result |
-|------------|--------|
-| A friend loses their bundle? | Fine, as long as threshold friends remain |
-| A friend leaks their share publicly? | Harmless without threshold-1 other shares |
-| ReMemory disappears in 10 years? | `recover.html` still works—it's self-contained |
-| Browsers change dramatically? | `recover.html` is plain HTML + WASM with no external dependencies |
-| You forget how this works? | Each bundle's README.txt explains everything |
-| Some friends can't be reached? | That's why you set threshold below total friends |
-
-</details>
 
 <details>
 <summary>Why ReMemory?</summary>
@@ -308,6 +260,19 @@ ReMemory solves this with cryptographic guarantees:
 - **No trust in any one person** — Even your most trusted friend can't access secrets alone
 - **Offline and self-contained** — Recovery works without internet, servers, or ReMemory itself
 - **Designed for non-technical friends to succeed under stress** — Clear instructions, not cryptographic puzzles
+
+</details>
+
+<details>
+<summary>Why I Built This</summary>
+
+Two things drove me to create ReMemory.
+
+First, I watched [a documentary about Clive Wearing](https://www.youtube.com/watch?v=k_P7Y0-wgos), a man who has lived with a 7-second memory since 1985. Seeing how fragile memory can be—how a single moment can permanently change everything—made me think about what would happen to my digital life if something similar happened to me.
+
+Second, I've had several concussions from cycling accidents. Each time, I've been lucky to recover fully. But each time, I've also been reminded that our brains are more fragile than we like to think. What if the next accident is different?
+
+ReMemory is my answer to these questions: a way to ensure the people I trust can access what matters, even if I can't help them.
 
 </details>
 
@@ -400,39 +365,7 @@ rememory recover \
 </details>
 
 <details>
-<summary>Best Practices</summary>
-
-### Choosing Friends
-
-- Pick people likely to be reachable long-term
-- Geographic diversity helps (not all in same disaster zone)
-- Mix of tech-savvy and non-tech friends is fine—the tool is designed for everyone
-- Consider their relationships with each other (will they cooperate?)
-
-### Choosing Threshold
-
-| Friends | Recommended Threshold | Notes |
-|---------|----------------------|-------|
-| 3 | 2 | Minimum viable setup |
-| 5 | 3 | Good balance of security and availability |
-| 7 | 4-5 | Higher security, requires more coordination |
-
-**Rule of thumb:** Set threshold high enough that casual collusion is unlikely, but low enough that recovery is possible if 1-2 friends are unavailable.
-
-### Rotation
-
-Consider creating a new project every 2-3 years:
-- Friends' contact info changes
-- You may want to update secrets
-- Relationships change
-- New cryptographic best practices emerge
-
-Use `rememory init new-project --from old-project` to copy friend configuration.
-
-</details>
-
-<details>
-<summary>Project Structure</summary>
+<summary>You store things in a Project</summary>
 
 ```
 my-recovery-2026/
@@ -452,32 +385,50 @@ my-recovery-2026/
 
 </details>
 
+
 <details>
-<summary>Verification</summary>
+<summary>Threat Model</summary>
 
-You can verify the integrity of any bundle without trusting ReMemory:
+ReMemory assumes:
+- Your friends will only cooperate after you're gone (or when needed)
+- At least *threshold* friends will keep their bundle safe
+- Your computer is trusted at the time you run `seal`
+- The browser used for recovery is not compromised at recovery time
 
-```bash
-rememory verify-bundle bundle-alice.zip
-```
-
-This checks:
-- All required files are present
-- Checksums match the values in README.txt
-- The embedded share is valid and parseable
+ReMemory does NOT rely on:
+- Any server or cloud service
+- Any ReMemory website or infrastructure
+- Any long-term availability of this project
+- The internet during recovery
 
 </details>
 
 <details>
-<summary>Why I Built This</summary>
+<summary>Cryptographic Guarantees</summary>
 
-Two things drove me to create ReMemory.
+| Component | Algorithm |
+|-----------|-----------|
+| Encryption | [age](https://github.com/FiloSottile/age) (scrypt passphrase mode) |
+| Key derivation | scrypt (N=2²⁰, r=8, p=1) |
+| Secret sharing | Shamir's Secret Sharing over GF(2⁸) |
+| Integrity | SHA-256 checksums |
+| Passphrase | 256 bits from crypto/rand |
 
-First, I watched [a documentary about Clive Wearing](https://www.youtube.com/watch?v=k_P7Y0-wgos), a man who has lived with a 7-second memory since 1985. Seeing how fragile memory can be—how a single moment can permanently change everything—made me think about what would happen to my digital life if something similar happened to me.
+**A single share reveals absolutely nothing about your secret, even to a cryptography expert.** This is a mathematical guarantee of Shamir's Secret Sharing—any fewer than *threshold* shares contains zero information about the original secret.
 
-Second, I've had several concussions from cycling accidents. Each time, I've been lucky to recover fully. But each time, I've also been reminded that our brains are more fragile than we like to think. What if the next accident is different?
+</details>
 
-ReMemory is my answer to these questions: a way to ensure the people I trust can access what matters, even if I can't help them.
+<details>
+<summary>Failure Scenarios</summary>
+
+| What if... | Result |
+|------------|--------|
+| A friend loses their bundle? | Fine, as long as threshold friends remain |
+| A friend leaks their share publicly? | Harmless without threshold-1 other shares |
+| ReMemory disappears in 10 years? | `recover.html` still works—it's self-contained |
+| Browsers change dramatically? | `recover.html` is plain HTML + WASM with no external dependencies |
+| You forget how this works? | Each bundle's README.txt explains everything |
+| Some friends can't be reached? | That's why you set threshold below total friends |
 
 </details>
 
