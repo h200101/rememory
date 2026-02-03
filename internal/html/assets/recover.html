@@ -60,9 +60,26 @@
         <p data-i18n="step1_drop">Drag & drop README.txt files here, or click to browse</p>
         <small data-i18n="step1_hint">Each README.txt contains the share for that person</small>
       </div>
-      <input type="file" id="share-file-input" accept=".txt,.pdf,.zip" multiple>
+      <input type="file" id="share-file-input" accept=".txt,.zip" multiple>
+
+      <div class="paste-section">
+        <button id="paste-toggle-btn" class="btn btn-secondary" type="button">
+          <span>📋</span> <span data-i18n="paste_btn">Paste a share</span>
+        </button>
+        <div id="paste-area" class="paste-area hidden">
+          <textarea id="paste-input" placeholder="Paste share text here..." data-i18n-placeholder="paste_placeholder" rows="6"></textarea>
+          <button id="paste-submit-btn" class="btn btn-primary" type="button" data-i18n="paste_submit">Add Share</button>
+        </div>
+      </div>
 
       <div id="shares-list" class="shares-list"></div>
+
+      <!-- Contact list for other friends (populated via JS if personalization data exists) -->
+      <div id="contact-list-section" class="contact-list-section hidden">
+        <h3 data-i18n="contact_list">Contact other share holders</h3>
+        <p class="hint" data-i18n="contact_list_hint">Reach out to these friends to collect their shares</p>
+        <div id="contact-list" class="contact-list"></div>
+      </div>
 
       <div id="threshold-info" class="threshold-info hidden"></div>
     </div>
@@ -118,136 +135,183 @@
   <script>
     const translations = {
       en: {
-        loading: "Loading recovery module...",
+        loading: "Preparing the recovery tool...",
         title: "🧠 ReMemory Recovery",
-        subtitle: "Recover your encrypted files using Shamir's Secret Sharing",
-        step1_title: "Collect Shares",
-        step1_drop: "Drag & drop README.txt files here, or click to browse",
-        step1_hint: "Each README.txt contains the share for that person",
-        step2_title: "Load Encrypted Manifest",
-        step2_drop: "Drag & drop MANIFEST.age here, or click to browse",
-        step2_hint: "This is the encrypted file containing your secrets",
-        step3_title: "Recover Files",
-        decrypt_btn: "Decrypt & Recover",
-        download_btn: "Download Archive (.tar.gz)",
-        no_manifest: "No manifest loaded",
-        works_offline: "Works completely offline",
+        subtitle: "A tool made for friends to unite in trying times...",
+        step1_title: "Gather the pieces",
+        step1_drop: "Drop the README.txt files here, or click to choose them",
+        step1_hint: "Each file holds one person’s piece",
+        step2_title: "Add the encrypted archive",
+        step2_drop: "Drop MANIFEST.age here, or click to choose it",
+        step2_hint: "This is the locked archive with the memories inside",
+        step3_title: "Recover the files",
+        decrypt_btn: "Unlock & Recover",
+        download_btn: "Download the archive (.tar.gz)",
+        no_manifest: "No archive added yet",
+        works_offline: "Works fully offline",
         need_help: "Need help?",
         download_cli: "Download CLI tool from GitHub",
-        need_more: "Need {0} more share(s)",
-        ready: "Ready to recover!",
-        shares_of: "{0} of {1} shares",
-        share_index: "Index {0} of {1}",
+        need_more: "Waiting for {0} more piece(s)",
+        ready: "Everything’s ready",
+        shares_of: "{0} of {1} pieces",
+        share_index: "Piece {0} of {1}",
         remove: "Remove",
         loaded: "loaded",
         manifest_loaded_bundle: "loaded from bundle",
-        combining: "Combining shares...",
-        decrypting: "Decrypting manifest...",
-        reading: "Reading archive contents...",
-        complete: "Recovery complete! {0} file(s) in archive.",
+        combining: "Bringing the pieces together...",
+        decrypting: "Unlocking the archive...",
+        reading: "Opening the archive...",
+        complete: "All done. {0} file(s) recovered.",
         error: "Error: {0}",
-        duplicate: "Duplicate share (index {0}) already added",
-        no_share: "No share found in {0}",
-        invalid_share: "Invalid share in {0}: {1}"
+        duplicate: "That piece is already here (index {0})",
+        no_share: "No piece found in {0}",
+        invalid_share: "That piece looks invalid in {0}: {1}",
+        paste_btn: "Paste a piece",
+        paste_placeholder: "Paste the piece text here...",
+        paste_submit: "Add piece",
+        paste_no_share: "No piece found in the pasted text",
+        your_share: "Your piece",
+        your_share_loaded: "Your piece is already here",
+        contact_list: "Contact the others",
+        contact_list_hint: "Reach out to these friends to gather their pieces",
+        shares_remaining: "{0} more piece(s) needed",
+        email_label: "Email",
+        phone_label: "Phone"
       },
+
       es: {
-        loading: "Cargando módulo de recuperación...",
-        title: "🧠 Recuperación ReMemory",
-        subtitle: "Recupera tus archivos encriptados usando el esquema de Shamir",
-        step1_title: "Recolectar Fragmentos",
-        step1_drop: "Arrastra archivos README.txt aquí, o haz clic para buscar",
-        step1_hint: "Cada README.txt contiene el fragmento de esa persona",
-        step2_title: "Cargar Manifiesto Encriptado",
-        step2_drop: "Arrastra MANIFEST.age aquí, o haz clic para buscar",
-        step2_hint: "Este es el archivo encriptado que contiene tus secretos",
-        step3_title: "Recuperar Archivos",
-        decrypt_btn: "Desencriptar y Recuperar",
-        download_btn: "Descargar Archivo (.tar.gz)",
-        no_manifest: "Ningún manifiesto cargado",
+        loading: "Preparando la herramienta de recuperación...",
+        title: "🧠 Recordando Recuerdos",
+        subtitle: "Cuando las cosas se ponen difíciles, los amigos se ayudan",
+        step1_title: "Reunir las partes",
+        step1_drop: "Arrastra los archivos README.txt aquí, o haz clic para buscarlos",
+        step1_hint: "Cada archivo contiene la parte de una persona",
+        step2_title: "Agregar el archivo encriptado",
+        step2_drop: "Arrastra MANIFEST.age aquí, o haz clic para buscarlo",
+        step2_hint: "Este es el archivo encriptado que guarda los recuerdos",
+        step3_title: "Recuperar los archivos",
+        decrypt_btn: "Desbloquear y recuperar",
+        download_btn: "Descargar el archivo (.tar.gz)",
+        no_manifest: "Aún no hay ningún archivo cargado",
         works_offline: "Funciona completamente sin internet",
         need_help: "¿Necesitas ayuda?",
         download_cli: "Descarga la herramienta CLI desde GitHub",
-        need_more: "Necesitas {0} fragmento(s) más",
-        ready: "¡Listo para recuperar!",
-        shares_of: "{0} de {1} fragmentos",
-        share_index: "Índice {0} de {1}",
+        need_more: "Faltan {0} parte(s)",
+        ready: "Todo está listo",
+        shares_of: "{0} de {1} partes",
+        share_index: "Parte {0} de {1}",
         remove: "Eliminar",
         loaded: "cargado",
         manifest_loaded_bundle: "cargado del paquete",
-        combining: "Combinando fragmentos...",
-        decrypting: "Desencriptando manifiesto...",
-        reading: "Leyendo contenido del archivo...",
-        complete: "¡Recuperación completa! {0} archivo(s) en el paquete.",
+        combining: "Uniendo las partes...",
+        decrypting: "Desbloqueando el archivo...",
+        reading: "Abriendo el archivo...",
+        complete: "Listo. {0} archivo(s) recuperado(s).",
         error: "Error: {0}",
-        duplicate: "Fragmento duplicado (índice {0}) ya fue agregado",
-        no_share: "No se encontró fragmento en {0}",
-        invalid_share: "Fragmento inválido en {0}: {1}"
+        duplicate: "Esa parte ya fue agregada (índice {0})",
+        no_share: "No se encontró ninguna parte en {0}",
+        invalid_share: "La parte en {0} no es válida: {1}",
+        paste_btn: "Pegar una parte",
+        paste_placeholder: "Pega aquí el texto de la parte...",
+        paste_submit: "Agregar parte",
+        paste_no_share: "No se encontró ninguna parte en el texto pegado",
+        your_share: "Tu parte",
+        your_share_loaded: "Tu parte ya está cargada",
+        contact_list: "Contactar a los demás",
+        contact_list_hint: "Habla con estos amigos para reunir sus partes",
+        shares_remaining: "Faltan {0} parte(s)",
+        email_label: "Correo",
+        phone_label: "Teléfono"
       },
+
       de: {
-        loading: "Wiederherstellungsmodul wird geladen...",
+        loading: "Wiederherstellung wird vorbereitet...",
         title: "🧠 ReMemory Wiederherstellung",
-        subtitle: "Stellen Sie Ihre verschlüsselten Dateien mit Shamirs Secret Sharing wieder her",
-        step1_title: "Anteile sammeln",
-        step1_drop: "README.txt-Dateien hierher ziehen oder klicken zum Durchsuchen",
-        step1_hint: "Jede README.txt enthält den Anteil dieser Person",
-        step2_title: "Verschlüsseltes Manifest laden",
-        step2_drop: "MANIFEST.age hierher ziehen oder klicken zum Durchsuchen",
-        step2_hint: "Dies ist die verschlüsselte Datei mit Ihren Geheimnissen",
+        subtitle: "Wenn alles schwer wirkt, kann man sich auf Freunde verlassen",
+        step1_title: "Teile sammeln",
+        step1_drop: "README.txt-Dateien hierher ziehen oder auswählen",
+        step1_hint: "Jede Datei enthält den Teil einer Person",
+        step2_title: "Verschlüsseltes Archiv hinzufügen",
+        step2_drop: "MANIFEST.age hierher ziehen oder auswählen",
+        step2_hint: "Dieses geschützte Archiv enthält die Erinnerungen",
         step3_title: "Dateien wiederherstellen",
-        decrypt_btn: "Entschlüsseln & Wiederherstellen",
+        decrypt_btn: "Entsperren & Wiederherstellen",
         download_btn: "Archiv herunterladen (.tar.gz)",
-        no_manifest: "Kein Manifest geladen",
+        no_manifest: "Noch kein Archiv geladen",
         works_offline: "Funktioniert komplett offline",
-        need_help: "Brauchen Sie Hilfe?",
+        need_help: "Brauchst du Hilfe?",
         download_cli: "CLI-Tool von GitHub herunterladen",
-        need_more: "Noch {0} Anteil(e) benötigt",
-        ready: "Bereit zur Wiederherstellung!",
-        shares_of: "{0} von {1} Anteilen",
-        share_index: "Index {0} von {1}",
+        need_more: "Es fehlen noch {0} Teil(e)",
+        ready: "Alles ist bereit",
+        shares_of: "{0} von {1} Teilen",
+        share_index: "Teil {0} von {1}",
         remove: "Entfernen",
         loaded: "geladen",
         manifest_loaded_bundle: "aus Bundle geladen",
-        combining: "Anteile werden kombiniert...",
-        decrypting: "Manifest wird entschlüsselt...",
-        reading: "Archivinhalt wird gelesen...",
-        complete: "Wiederherstellung abgeschlossen! {0} Datei(en) im Archiv.",
+        combining: "Teile werden zusammengebracht...",
+        decrypting: "Archiv wird entsperrt...",
+        reading: "Archiv wird geöffnet...",
+        complete: "Fertig. {0} Datei(en) wiederhergestellt.",
         error: "Fehler: {0}",
-        duplicate: "Doppelter Anteil (Index {0}) bereits hinzugefügt",
-        no_share: "Kein Anteil in {0} gefunden",
-        invalid_share: "Ungültiger Anteil in {0}: {1}"
+        duplicate: "Dieser Teil ist bereits vorhanden (Index {0})",
+        no_share: "Kein Teil in {0} gefunden",
+        invalid_share: "Der Teil in {0} ist ungültig: {1}",
+        paste_btn: "Teil einfügen",
+        paste_placeholder: "Teil-Text hier einfügen...",
+        paste_submit: "Teil hinzufügen",
+        paste_no_share: "Kein Teil im eingefügten Text gefunden",
+        your_share: "Dein Teil",
+        your_share_loaded: "Dein Teil ist bereits geladen",
+        contact_list: "Die anderen kontaktieren",
+        contact_list_hint: "Bitte diese Freunde um ihre Teile",
+        shares_remaining: "Noch {0} Teil(e) nötig",
+        email_label: "E-Mail",
+        phone_label: "Telefon"
       },
+
       fr: {
-        loading: "Chargement du module de récupération...",
-        title: "Récupération ReMemory",
-        subtitle: "Récupérez vos fichiers chiffrés en utilisant le partage de secret de Shamir",
-        step1_title: "Collecter les Parts",
-        step1_drop: "Glissez-déposez les fichiers README.txt ici, ou cliquez pour parcourir",
-        step1_hint: "Chaque README.txt contient la part de cette personne",
-        step2_title: "Charger le Manifeste Chiffré",
-        step2_drop: "Glissez-déposez MANIFEST.age ici, ou cliquez pour parcourir",
-        step2_hint: "C'est le fichier chiffré contenant vos secrets",
-        step3_title: "Récupérer les Fichiers",
-        decrypt_btn: "Déchiffrer & Récupérer",
-        download_btn: "Télécharger l'Archive (.tar.gz)",
-        no_manifest: "Aucun manifeste chargé",
+        loading: "Préparation de l’outil de récupération...",
+        title: "🧠 Récupération ReMemory",
+        subtitle: "Quand tout devient compliqué, on peut compter sur ses amis",
+        step1_title: "Rassembler les parts",
+        step1_drop: "Déposez les fichiers README.txt ici ou sélectionnez-les",
+        step1_hint: "Chaque fichier contient la part d’une personne",
+        step2_title: "Ajouter l’archive chiffrée",
+        step2_drop: "Déposez MANIFEST.age ici ou sélectionnez-le",
+        step2_hint: "Cette archive protégée contient les souvenirs",
+        step3_title: "Récupérer les fichiers",
+        decrypt_btn: "Déverrouiller et récupérer",
+        download_btn: "Télécharger l’archive (.tar.gz)",
+        no_manifest: "Aucune archive ajoutée pour le moment",
         works_offline: "Fonctionne entièrement hors ligne",
         need_help: "Besoin d'aide ?",
         download_cli: "Télécharger l'outil CLI depuis GitHub",
-        need_more: "Besoin de {0} part(s) supplémentaire(s)",
-        ready: "Prêt pour la récupération !",
+        need_more: "Il manque encore {0} part(s)",
+        ready: "Tout est prêt",
         shares_of: "{0} sur {1} parts",
-        share_index: "Index {0} sur {1}",
+        share_index: "Part {0} sur {1}",
         remove: "Supprimer",
         loaded: "chargé",
         manifest_loaded_bundle: "chargé depuis le bundle",
-        combining: "Combinaison des parts...",
-        decrypting: "Déchiffrement du manifeste...",
-        reading: "Lecture du contenu de l'archive...",
-        complete: "Récupération terminée ! {0} fichier(s) dans l'archive.",
+        combining: "Les parts se rassemblent...",
+        decrypting: "Déverrouillage de l’archive...",
+        reading: "Ouverture de l’archive...",
+        complete: "C’est fait. {0} fichier(s) récupéré(s).",
         error: "Erreur : {0}",
-        duplicate: "Part en double (index {0}) déjà ajoutée",
+        duplicate: "Cette part est déjà présente (index {0})",
         no_share: "Aucune part trouvée dans {0}",
-        invalid_share: "Part invalide dans {0} : {1}"
+        invalid_share: "La part dans {0} est invalide : {1}",
+        paste_btn: "Coller une part",
+        paste_placeholder: "Collez le texte de la part ici...",
+        paste_submit: "Ajouter la part",
+        paste_no_share: "Aucune part trouvée dans le texte collé",
+        your_share: "Votre part",
+        your_share_loaded: "Votre part est déjà chargée",
+        contact_list: "Contacter les autres",
+        contact_list_hint: "Contactez ces amis pour réunir leurs parts",
+        shares_remaining: "Il manque encore {0} part(s)",
+        email_label: "E-mail",
+        phone_label: "Téléphone"
       }
     };
 
@@ -276,22 +340,36 @@
         el.textContent = t(key);
       });
 
+      // Update placeholder attributes
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        el.placeholder = t(key);
+      });
+
       // Update page title
       document.title = t('title');
     }
 
-    // Initialize language toggle
-    document.addEventListener('DOMContentLoaded', () => {
-      // Try to detect language from browser or localStorage
+    // Set initial language immediately (before app.js runs)
+    (function() {
       const saved = localStorage.getItem('rememory-lang');
       const browserLang = navigator.language.split('-')[0];
-      const defaultLang = saved || (['es', 'de', 'fr'].includes(browserLang) ? browserLang : 'en');
+      currentLang = saved || (['es', 'de', 'fr'].includes(browserLang) ? browserLang : 'en');
+    })();
 
-      setLanguage(defaultLang);
+    // Initialize language toggle buttons after DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      setLanguage(currentLang);
 
       // Add click handlers
       document.querySelectorAll('.lang-toggle button').forEach(btn => {
-        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+        btn.addEventListener('click', () => {
+          setLanguage(btn.dataset.lang);
+          // Re-render dynamic content when language changes
+          if (typeof window.rememoryUpdateUI === 'function') {
+            window.rememoryUpdateUI();
+          }
+        });
       });
     });
   </script>
@@ -299,13 +377,18 @@
   <!-- Go WASM runtime -->
   <script>{{WASM_EXEC}}</script>
 
-  <!-- Application logic -->
-  <script>{{APP_JS}}</script>
-
   <!-- Embedded WASM binary (base64) -->
   <script>
     const WASM_BINARY = "{{WASM_BASE64}}";
   </script>
+
+  <!-- Personalization data (embedded for this specific friend) -->
+  <script>
+    const PERSONALIZATION = {{PERSONALIZATION_DATA}};
+  </script>
+
+  <!-- Application logic (must come after WASM_BINARY and PERSONALIZATION) -->
+  <script>{{APP_JS}}</script>
 
   <!-- Load WASM from embedded binary -->
   <script>

@@ -97,6 +97,10 @@ func ParseShare(content []byte) (*Share, error) {
 		// Parse header fields
 		parts := strings.SplitN(line, ": ", 2)
 		if len(parts) != 2 {
+			// Line doesn't look like a header - must be base64 data
+			// This handles cases where empty line is missing (e.g., copied from PDF)
+			inData = true
+			dataLines = append(dataLines, line)
 			continue
 		}
 

@@ -12,27 +12,27 @@ Each friend receives a bundle containing `recover.html`—a self-contained recov
 
 Your friends can recover your secrets with nothing but a web browser and their bundles. That's it.
 
-**[Download demo bundles](https://github.com/eljojo/rememory/releases/download/v0.0.2/demo-bundles.zip)** to try the recovery tool yourself. See the **[User Guide](docs/guide.md)** for a complete tutorial.
+**[Download demo bundles](https://github.com/eljojo/rememory/releases/download/v0.0.3/demo-bundles.zip)** to try the recovery tool yourself. See the **[User Guide](docs/guide.md)** for a complete tutorial.
 
 ```mermaid
 graph TB
     subgraph seal["① SEAL (you do this once)"]
         A[Your Secrets] --> B[Encrypt with age]
         B --> C[Split key into 5 shares]
-        C --> D1[Alice's bundle]
-        C --> D2[Bob's bundle]
-        C --> D3[Carol's bundle]
-        C --> D4[David's bundle]
-        C --> D5[Eve's bundle]
+        C --> D1[Alice's personalized bundle]
+        C --> D2[Bob's personalized bundle]
+        C --> D3[Carol's personalized bundle]
+        C --> D4[David's personalized bundle]
+        C --> D5[Eve's personalized bundle]
     end
 
     subgraph recover["② RECOVER (friends do this together)"]
-        R1[Alice opens recover.html] --> R2[Drops her README.txt]
-        R2 --> R3[Bob drops his README.txt]
-        R3 --> R4[Carol drops her README.txt]
+        R1[Alice opens recover.html] --> R2[Her share is pre-loaded!]
+        R2 --> R3[Adds Bob's share]
+        R3 --> R4[Adds Carol's share]
         R4 --> R5{3 of 5 shares}
-        R5 -->|Threshold met| R6[Key reconstructed]
-        R6 --> R7[Secrets decrypted]
+        R5 -->|Threshold met| R6[Auto-decrypts!]
+        R6 --> R7[Download files]
     end
 
     D1 -.-> R1

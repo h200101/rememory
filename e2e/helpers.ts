@@ -93,19 +93,23 @@ export class RecoveryPage {
   }
 
   async expectShareHolder(name: string): Promise<void> {
-    await expect(this.page.locator('.share-item')).toContainText(name);
+    await expect(this.page.locator('.share-item').filter({ hasText: name })).toBeVisible();
   }
 
   async expectReadyToRecover(): Promise<void> {
-    await expect(this.page.locator('#threshold-info')).toContainText('Ready to recover');
+    await expect(this.page.locator('#threshold-info')).toHaveClass(/ready/);
   }
 
   async expectNeedMoreShares(count: number): Promise<void> {
-    await expect(this.page.locator('#threshold-info')).toContainText(`Need ${count} more share`);
+    await expect(this.page.locator('#threshold-info')).toContainText(`Waiting for ${count} more piece`);
   }
 
   async expectManifestLoaded(): Promise<void> {
     await expect(this.page.locator('#manifest-status')).toHaveClass(/loaded/);
+  }
+
+  async expectManifestDropZoneVisible(): Promise<void> {
+    await expect(this.page.locator('#manifest-drop-zone')).toBeVisible();
   }
 
   async expectRecoverEnabled(): Promise<void> {
@@ -117,7 +121,7 @@ export class RecoveryPage {
   }
 
   async expectRecoveryComplete(): Promise<void> {
-    await expect(this.page.locator('#status-message')).toContainText('Recovery complete', { timeout: 60000 });
+    await expect(this.page.locator('#status-message')).toContainText('All done', { timeout: 60000 });
   }
 
   async expectFileCount(count: number): Promise<void> {
@@ -137,5 +141,55 @@ export class RecoveryPage {
   // Dismiss dialogs (for duplicate share tests)
   onDialog(action: 'dismiss' | 'accept' = 'dismiss'): void {
     this.page.on('dialog', dialog => dialog[action]());
+  }
+
+  // Paste functionality
+  async clickPasteButton(): Promise<void> {
+    await this.page.locator('#paste-toggle-btn').click();
+  }
+
+  async expectPasteAreaVisible(): Promise<void> {
+    await expect(this.page.locator('#paste-area')).toBeVisible();
+  }
+
+  async pasteShare(content: string): Promise<void> {
+    await this.page.locator('#paste-input').fill(content);
+  }
+
+  async submitPaste(): Promise<void> {
+    await this.page.locator('#paste-submit-btn').click();
+  }
+
+  // Holder share label check
+  async expectHolderShareLabel(): Promise<void> {
+    await expect(this.page.locator('.share-item').first()).toContainText('Your piece');
+  }
+
+  // Contact list assertions
+  async expectContactListVisible(): Promise<void> {
+    await expect(this.page.locator('#contact-list-section')).toBeVisible();
+  }
+
+  async expectContactItem(name: string): Promise<void> {
+    await expect(this.page.locator('.contact-item').filter({ hasText: name })).toBeVisible();
+  }
+
+  async expectContactCollected(name: string): Promise<void> {
+    const contact = this.page.locator('.contact-item').filter({ hasText: name });
+    await expect(contact).toHaveClass(/collected/);
+  }
+
+  async expectContactNotCollected(name: string): Promise<void> {
+    const contact = this.page.locator('.contact-item').filter({ hasText: name });
+    await expect(contact).not.toHaveClass(/collected/);
+  }
+
+  // Steps collapse assertions
+  async expectStepsVisible(): Promise<void> {
+    await expect(this.page.locator('.card').first()).toBeVisible();
+  }
+
+  async expectStepsCollapsed(): Promise<void> {
+    await expect(this.page.locator('.card.collapsed').first()).toBeAttached();
   }
 }

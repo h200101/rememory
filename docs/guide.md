@@ -247,7 +247,13 @@ Each bundle contains:
 | `README.txt` | Instructions + their unique share + contact list for other holders |
 | `README.pdf` | Same content, formatted for printing |
 | `MANIFEST.age` | Your encrypted secrets (same in all bundles) |
-| `recover.html` | Browser-based recovery tool (~5 MB, self-contained) |
+| `recover.html` | **Personalized** browser-based recovery tool (~1.8 MB, self-contained) |
+
+**What makes each bundle unique:**
+- The `recover.html` is personalized for each friend:
+  - Their share is pre-loaded automatically
+  - Shows a contact list with other friends' info
+  - They only need to load the manifest and collect shares from others to complete recovery
 
 The README.txt includes:
 
@@ -312,18 +318,36 @@ Holder: Alice
 
 When your friends need to recover your secrets:
 
-1. One friend opens `recover.html` from their bundle in any modern browser
-2. They drag and drop their `README.txt` file onto the page
-3. Other friends send their `README.txt` files (via email, messaging, etc.)
-4. As each share is added, the progress updates
-5. Once threshold is met (e.g., 3 of 5), decryption happens automatically
-6. Download the recovered files
+1. **One friend opens `recover.html`** from their bundle in any modern browser
+   - Their share is **automatically pre-loaded** (the tool is personalized!)
+   - They'll see a **contact list** showing other friends who hold shares
+
+2. **Load the encrypted manifest**
+   - Drag and drop `MANIFEST.age` from the bundle onto the manifest area
+   - Or click to browse and select it
+
+3. **Coordinate with other friends**
+   - The contact list shows names, emails, and phone numbers
+   - Reach out and ask them to send their `README.txt` file
+
+4. **Add shares from other friends**
+   - Drag and drop their `README.txt` files onto the page, OR
+   - Click the 📋 clipboard button to paste share text directly
+   - As each share is added, a ✓ checkmark appears next to that friend's name
+
+5. **Recovery happens automatically**
+   - Once threshold is met (e.g., 2 of 3 shares), decryption starts immediately
+   - The input steps collapse to show the recovery progress
+   - No need to click any buttons!
+
+6. **Download the recovered files**
 
 **Key points:**
 - Works completely offline—no internet required
 - No data leaves the browser
 - Works on Chrome, Firefox, Safari, Edge
 - Friends can be in different locations; they just need to share their README.txt files
+- Each friend's `recover.html` is personalized with their share pre-loaded
 
 ### CLI Recovery (Fallback)
 
@@ -411,6 +435,7 @@ my-recovery-2026/
 | Command | Description |
 |---------|-------------|
 | `rememory init <name>` | Create a new project |
+| `rememory demo [dir]` | Create a demo project with sample data (great for testing!) |
 | `rememory seal` | Encrypt manifest, create shares, and generate bundles |
 | `rememory bundle` | Regenerate bundles (if lost or need updating) |
 | `rememory status` | Show project status and summary |

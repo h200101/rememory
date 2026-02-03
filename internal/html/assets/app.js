@@ -10,7 +10,8 @@
     threshold: 0,      // Required shares (from first parsed share)
     total: 0,          // Total shares
     wasmReady: false,
-    recovering: false
+    recovering: false,
+    recoveryComplete: false
   };
 
   // DOM elements
@@ -29,17 +30,113 @@
     statusMessage: document.getElementById('status-message'),
     filesList: document.getElementById('files-list'),
     downloadActions: document.getElementById('download-actions'),
-    downloadAllBtn: document.getElementById('download-all-btn')
+    downloadAllBtn: document.getElementById('download-all-btn'),
+    pasteToggleBtn: document.getElementById('paste-toggle-btn'),
+    pasteArea: document.getElementById('paste-area'),
+    pasteInput: document.getElementById('paste-input'),
+    pasteSubmitBtn: document.getElementById('paste-submit-btn'),
+    contactListSection: document.getElementById('contact-list-section'),
+    contactList: document.getElementById('contact-list'),
+    step1Card: null, // Set after DOM ready
+    step2Card: null  // Set after DOM ready
   };
+
+  // Personalization data (embedded in HTML)
+  const personalization = (typeof PERSONALIZATION !== 'undefined') ? PERSONALIZATION : null;
 
   // Share regex to extract from README.txt content
   const shareRegex = /-----BEGIN REMEMORY SHARE-----([\s\S]*?)-----END REMEMORY SHARE-----/;
 
   // Initialize
   async function init() {
+    // Get step card references
+    const cards = document.querySelectorAll('.card');
+    elements.step1Card = cards[0];
+    elements.step2Card = cards[1];
+
     setupDropZones();
     setupButtons();
+    setupPaste();
+
+    // Render contact list immediately (doesn't need WASM)
+    if (personalization && personalization.otherFriends && personalization.otherFriends.length > 0) {
+      renderContactList();
+      elements.contactListSection.classList.remove('hidden');
+    }
+
     await loadWasm();
+
+    // Load personalization data after WASM is ready
+    if (personalization) {
+      loadPersonalizationData();
+    }
+  }
+
+  // Load personalization data (holder's share only - manifest must be loaded separately)
+  function loadPersonalizationData() {
+    if (!personalization) return;
+
+    // Load the holder's share automatically
+    if (personalization.holderShare) {
+      const result = window.rememoryParseShare(personalization.holderShare);
+      if (!result.error) {
+        const share = result.share;
+        share.isHolder = true; // Mark as holder's own share
+        state.threshold = share.threshold;
+        state.total = share.total;
+        state.shares.push(share);
+        updateSharesUI();
+        updateContactList();
+      }
+    }
+
+    checkRecoverReady();
+  }
+
+  // Render the contact list for other friends
+  function renderContactList() {
+    if (!personalization || !personalization.otherFriends) return;
+
+    elements.contactList.innerHTML = '';
+
+    personalization.otherFriends.forEach(friend => {
+      const item = document.createElement('div');
+      item.className = 'contact-item';
+      item.dataset.name = friend.name;
+
+      let contactInfo = '';
+      if (friend.email) {
+        contactInfo += `<a href="mailto:${escapeHtml(friend.email)}">${escapeHtml(friend.email)}</a>`;
+      }
+      if (friend.phone) {
+        if (contactInfo) contactInfo += ' &bull; ';
+        contactInfo += escapeHtml(friend.phone);
+      }
+
+      item.innerHTML = `
+        <div class="checkbox"></div>
+        <div class="details">
+          <div class="name">${escapeHtml(friend.name)}</div>
+          <div class="contact-info">${contactInfo || '—'}</div>
+        </div>
+      `;
+
+      elements.contactList.appendChild(item);
+    });
+  }
+
+  // Update contact list checkboxes based on collected shares
+  function updateContactList() {
+    if (!personalization || !personalization.otherFriends) return;
+
+    const collectedNames = new Set(state.shares.map(s => s.holder?.toLowerCase()));
+
+    elements.contactList.querySelectorAll('.contact-item').forEach(item => {
+      const name = item.dataset.name.toLowerCase();
+      const isCollected = collectedNames.has(name);
+      item.classList.toggle('collected', isCollected);
+      item.querySelector('.checkbox').textContent = isCollected ? '✓' : '';
+    });
   }
 
   // Load WASM module
@@ -134,6 +231,72 @@
     });
   }
 
+  // Setup paste functionality
+  function setupPaste() {
+    elements.pasteToggleBtn.addEventListener('click', () => {
+      const isHidden = elements.pasteArea.classList.contains('hidden');
+      elements.pasteArea.classList.toggle('hidden', !isHidden);
+      if (isHidden) {
+        elements.pasteInput.focus();
+      }
+    });
+
+    elements.pasteSubmitBtn.addEventListener('click', async () => {
+      const content = elements.pasteInput.value.trim();
+      if (!content) return;
+
+      await parseAndAddShareFromPaste(content);
+      elements.pasteInput.value = '';
+      elements.pasteArea.classList.add('hidden');
+    });
+
+    // Allow Enter key in textarea with Ctrl/Cmd to submit
+    elements.pasteInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        elements.pasteSubmitBtn.click();
+      }
+    });
+  }
+
+  // Parse share from pasted content
+  async function parseAndAddShareFromPaste(content) {
+    if (!state.wasmReady) {
+      showError(t('error', 'Recovery module not ready'));
+      return;
+    }
+
+    // Check if content contains a share
+    if (!shareRegex.test(content)) {
+      showError(t('paste_no_share'));
+      return;
+    }
+
+    const result = window.rememoryParseShare(content);
+    if (result.error) {
+      showError(t('error', result.error));
+      return;
+    }
+
+    const share = result.share;
+
+    // Check for duplicate index
+    if (state.shares.some(s => s.index === share.index)) {
+      showError(t('duplicate', share.index));
+      return;
+    }
+
+    // Set threshold/total from first share
+    if (state.shares.length === 0) {
+      state.threshold = share.threshold;
+      state.total = share.total;
+    }
+
+    state.shares.push(share);
+    updateSharesUI();
+    checkRecoverReady();
+  }
+
   // Handle share file uploads
   async function handleShareFiles(files) {
     for (const file of files) {
@@ -188,15 +351,7 @@
     // If manifest is included and we don't have one yet, use it
     if (result.manifest && !state.manifest) {
       state.manifest = result.manifest;
-      elements.manifestStatus.innerHTML = `
-        <span class="icon">&#9989;</span>
-        <div>
-          <strong>MANIFEST.age</strong> ${t('manifest_loaded_bundle')}
-          <div style="font-size: 0.875rem; color: #6c757d;">${formatSize(state.manifest.length)}</div>
-        </div>
-      `;
-      elements.manifestStatus.classList.remove('hidden');
-      elements.manifestStatus.classList.add('loaded');
+      showManifestLoaded('MANIFEST.age', state.manifest.length, true);
     }
 
     checkRecoverReady();
@@ -245,13 +400,22 @@
     state.shares.forEach((share, idx) => {
       const item = document.createElement('div');
       item.className = 'share-item valid';
+
+      // Check if this is the holder's own share (from personalization)
+      const isHolderShare = share.isHolder ||
+        (personalization && share.holder &&
+         share.holder.toLowerCase() === personalization.holder.toLowerCase());
+
+      const holderLabel = isHolderShare ? ` (${t('your_share')})` : '';
+      const showRemove = !isHolderShare; // Don't allow removing holder's own share
+
       item.innerHTML = `
         <span class="icon">&#9989;</span>
         <div class="details">
-          <div class="name">${escapeHtml(share.holder || 'Share ' + share.index)}</div>
+          <div class="name">${escapeHtml(share.holder || 'Share ' + share.index)}${holderLabel}</div>
           <div class="meta">${t('share_index', share.index, share.total)}</div>
         </div>
-        <button class="remove" data-idx="${idx}" title="${t('remove')}">&times;</button>
+        ${showRemove ? `<button class="remove" data-idx="${idx}" title="${t('remove')}">&times;</button>` : ''}
       `;
       elements.sharesList.appendChild(item);
     });
@@ -266,6 +430,7 @@
           state.total = 0;
         }
         updateSharesUI();
+        updateContactList();
         checkRecoverReady();
       });
     });
@@ -281,6 +446,9 @@
     } else {
       elements.thresholdInfo.classList.add('hidden');
     }
+
+    // Update contact list checkboxes
+    updateContactList();
   }
 
   // Handle manifest file upload
@@ -299,19 +467,38 @@
       const buffer = await readFileAsArrayBuffer(file);
       state.manifest = new Uint8Array(buffer);
 
-      elements.manifestStatus.innerHTML = `
-        <span class="icon">&#9989;</span>
-        <div>
-          <strong>${escapeHtml(file.name)}</strong> ${t('loaded')}
-          <div style="font-size: 0.875rem; color: #6c757d;">${formatSize(state.manifest.length)}</div>
-        </div>
-      `;
-      elements.manifestStatus.classList.remove('hidden');
-      elements.manifestStatus.classList.add('loaded');
+      showManifestLoaded(file.name, state.manifest.length);
       checkRecoverReady();
     } catch (err) {
       showError(t('error', err.message));
     }
+  }
+
+  // Show manifest loaded state with clear button
+  function showManifestLoaded(filename, size, fromBundle = false) {
+    elements.manifestDropZone.classList.add('hidden');
+    elements.manifestStatus.innerHTML = `
+      <span class="icon">&#9989;</span>
+      <div style="flex: 1;">
+        <strong>${escapeHtml(filename)}</strong> ${fromBundle ? t('manifest_loaded_bundle') : t('loaded')}
+        <div style="font-size: 0.875rem; color: #6c757d;">${formatSize(size)}</div>
+      </div>
+      <button class="clear-manifest" title="${t('remove')}">&times;</button>
+    `;
+    elements.manifestStatus.classList.remove('hidden');
+    elements.manifestStatus.classList.add('loaded');
+
+    // Add clear handler
+    elements.manifestStatus.querySelector('.clear-manifest').addEventListener('click', clearManifest);
+  }
+
+  // Clear manifest and show drop zone again
+  function clearManifest() {
+    state.manifest = null;
+    elements.manifestStatus.classList.add('hidden');
+    elements.manifestStatus.classList.remove('loaded');
+    elements.manifestDropZone.classList.remove('hidden');
+    checkRecoverReady();
   }
 
   // Setup buttons
@@ -325,12 +512,30 @@
                   state.threshold > 0 &&
                   state.manifest !== null;
     elements.recoverBtn.disabled = !ready;
+
+    // Auto-start recovery when conditions are met
+    if (ready && !state.recovering && !state.recoveryComplete) {
+      startRecovery();
+    }
+  }
+
+  // Collapse steps 1 and 2 to focus on recovery
+  function collapseInputSteps() {
+    if (elements.step1Card) {
+      elements.step1Card.classList.add('collapsed');
+    }
+    if (elements.step2Card) {
+      elements.step2Card.classList.add('collapsed');
+    }
   }
 
   // Recovery process
   async function startRecovery() {
     if (state.recovering) return;
     state.recovering = true;
+
+    // Collapse steps 1 and 2 to focus on recovery
+    collapseInputSteps();
 
     elements.recoverBtn.disabled = true;
     elements.progressBar.classList.remove('hidden');
@@ -394,9 +599,14 @@
       setProgress(100);
       setStatus(t('complete', files.length), 'success');
       elements.downloadActions.classList.remove('hidden');
+      elements.recoverBtn.classList.add('hidden');
+      state.recoveryComplete = true;
 
     } catch (err) {
       setStatus(t('error', err.message), 'error');
+      // On error, show steps again so user can try different shares
+      if (elements.step1Card) elements.step1Card.classList.remove('collapsed');
+      if (elements.step2Card) elements.step2Card.classList.remove('collapsed');
     } finally {
       state.recovering = false;
       elements.recoverBtn.disabled = false;
@@ -471,6 +681,12 @@
     alert(msg); // Simple for now, could be a toast
     // Note: Removed console.error to avoid logging sensitive information
   }
+
+  // Expose function to re-render UI when language changes
+  window.rememoryUpdateUI = function() {
+    updateSharesUI();
+    updateContactList();
+  };
 
   // Start
   document.addEventListener('DOMContentLoaded', init);

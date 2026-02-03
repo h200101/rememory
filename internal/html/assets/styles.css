@@ -169,6 +169,20 @@ input[type="file"] {
   background: #d4edda;
 }
 
+.manifest-status .clear-manifest {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.manifest-status .clear-manifest:hover {
+  color: #a71d2a;
+}
+
 .manifest-status .icon {
   font-size: 1.5rem;
 }
@@ -322,6 +336,137 @@ footer a:hover {
 
 .hidden {
   display: none !important;
+}
+
+/* Paste section */
+.paste-section {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.paste-area {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.paste-area textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.paste-area textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* Card collapse animation */
+.card {
+  transition: opacity 0.3s, max-height 0.3s, padding 0.3s, margin 0.3s;
+  overflow: hidden;
+}
+
+.card.collapsed {
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Contact list */
+.contact-list-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.contact-list-section h3 {
+  font-size: 1rem;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.contact-list-section .hint {
+  font-size: 0.875rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #bdc3c7;
+}
+
+.contact-item.collected {
+  background: #d4edda;
+  border-left-color: #28a745;
+}
+
+.contact-item .checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #bdc3c7;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.contact-item.collected .checkbox {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+.contact-item .details {
+  flex: 1;
+}
+
+.contact-item .name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.contact-item .contact-info {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.contact-item .contact-info a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.contact-item .contact-info a:hover {
+  text-decoration: underline;
 }
 
 /* Responsive */

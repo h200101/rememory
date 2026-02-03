@@ -48,10 +48,6 @@ func GenerateAll(p *project.Project, cfg Config) error {
 	}
 	manifestChecksum := core.HashBytes(manifestData)
 
-	// Generate recover.html
-	recoverHTML := html.GenerateRecoverHTML(cfg.WASMBytes, cfg.Version, cfg.GitHubReleaseURL)
-	recoverChecksum := core.HashString(recoverHTML)
-
 	// Generate bundle for each friend
 	for i, friend := range p.Friends {
 		share := shares[i]
@@ -63,6 +59,27 @@ func GenerateAll(p *project.Project, cfg Config) error {
 				otherFriends = append(otherFriends, f)
 			}
 		}
+
+		// Convert to FriendInfo for HTML personalization
+		otherFriendsInfo := make([]html.FriendInfo, len(otherFriends))
+		for j, f := range otherFriends {
+			otherFriendsInfo[j] = html.FriendInfo{
+				Name:  f.Name,
+				Email: f.Email,
+				Phone: f.Phone,
+			}
+		}
+
+		// Generate personalized recover.html for this friend
+		personalization := &html.PersonalizationData{
+			Holder:       friend.Name,
+			HolderShare:  share.Encode(),
+			OtherFriends: otherFriendsInfo,
+			Threshold:    p.Threshold,
+			Total:        len(p.Friends),
+		}
+		recoverHTML := html.GenerateRecoverHTML(cfg.WASMBytes, cfg.Version, cfg.GitHubReleaseURL, personalization)
+		recoverChecksum := core.HashString(recoverHTML)
 
 		bundlePath := filepath.Join(bundlesDir, fmt.Sprintf("bundle-%s.zip", sanitizeName(friend.Name)))
 
