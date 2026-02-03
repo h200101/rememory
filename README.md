@@ -1,4 +1,4 @@
-# ReMemory
+# 🧠 ReMemory
 
 **A future-proof, human-recoverable, zero-infrastructure cryptographic inheritance protocol.**
 
@@ -12,6 +12,8 @@ Each friend receives a bundle containing `recover.html`—a self-contained recov
 
 Your friends can recover your secrets with nothing but a web browser and their bundles. That's it.
 
+**[Download demo bundles](https://github.com/eljojo/rememory/releases/download/v0.0.2/demo-bundles.zip)** to try the recovery tool yourself. See the **[User Guide](docs/guide.md)** for a complete tutorial.
+
 ```mermaid
 graph TD
     A[Open recover.html] --> B[Drop Alice's README.txt]
@@ -22,140 +24,64 @@ graph TD
     F --> G[Download recovered files]
 ```
 
-## Threat Model
-
-ReMemory assumes:
-- Your friends will only cooperate after you're gone (or when needed)
-- At least *threshold* friends will keep their bundle safe
-- Your computer is trusted at the time you run `seal`
-- The browser used for recovery is not compromised at recovery time
-
-ReMemory does NOT rely on:
-- Any server or cloud service
-- Any ReMemory website or infrastructure
-- Any long-term availability of this project
-- The internet during recovery
-
-## Cryptographic Guarantees
-
-| Component | Algorithm |
-|-----------|-----------|
-| Encryption | [age](https://github.com/FiloSottile/age) (scrypt passphrase mode) |
-| Key derivation | scrypt (N=2²⁰, r=8, p=1) |
-| Secret sharing | Shamir's Secret Sharing over GF(2⁸) |
-| Integrity | SHA-256 checksums |
-| Passphrase | 256 bits from crypto/rand |
-
-**A single share reveals absolutely nothing about your secret, even to a cryptography expert.** This is a mathematical guarantee of Shamir's Secret Sharing—any fewer than *threshold* shares contains zero information about the original secret.
-
-## Failure Scenarios
-
-| What if... | Result |
-|------------|--------|
-| A friend loses their bundle? | Fine, as long as threshold friends remain |
-| A friend leaks their share publicly? | Harmless without threshold-1 other shares |
-| ReMemory disappears in 10 years? | `recover.html` still works—it's self-contained |
-| Browsers change dramatically? | `recover.html` is plain HTML + WASM with no external dependencies |
-| You forget how this works? | Each bundle's README.txt explains everything |
-| Some friends can't be reached? | That's why you set threshold below total friends |
-
-## Why ReMemory?
-
-We all have digital secrets that matter: password manager recovery codes, cryptocurrency seeds, important documents, or instructions for loved ones. What happens to these if you're suddenly unavailable?
-
-Traditional approaches fail:
-- **Give one person everything** → Single point of failure and trust
-- **Split files manually** → Confusing, error-prone, no encryption
-- **Use a password manager's emergency access** → Relies on company existing
-- **Write it in a will** → Becomes public record, slow legal process
-
-ReMemory solves this with cryptographic guarantees:
-
-- **No single point of failure** — Your secrets require multiple friends to cooperate
-- **No trust in any one person** — Even your most trusted friend can't access secrets alone
-- **Offline and self-contained** — Recovery works without internet, servers, or ReMemory itself
-- **Designed for non-technical friends to succeed under stress** — Clear instructions, not cryptographic puzzles
-
-## How It Works
-
-### What Your Friends Do (Recovery)
-
-When the time comes, your friends gather and use `recover.html`:
-
-```mermaid
-sequenceDiagram
-    participant Alice
-    participant Bob
-    participant Carol
-    participant Browser as recover.html
-    participant WASM as Go WASM
-
-    Alice->>Browser: Opens recover.html
-    Alice->>Browser: Drops README.txt (contains her share)
-    Bob->>Browser: Drops README.txt (contains his share)
-    Carol->>Browser: Drops README.txt (contains her share)
-    Browser->>WASM: Combine 3 shares
-    WASM-->>Browser: Reconstructed passphrase
-    Browser->>WASM: Decrypt MANIFEST.age
-    WASM-->>Browser: Decrypted files
-    Browser-->>Alice: Download recovered files
-```
-
-Everything happens locally in the browser. No data leaves their computer.
-
-### What You Do (Sealing)
-
-When you run `rememory seal`:
-
-```mermaid
-sequenceDiagram
-    participant You
-    participant ReMemory
-    participant Age as age encryption
-    participant Shamir as Shamir's Secret Sharing
-
-    You->>ReMemory: rememory seal
-    ReMemory->>ReMemory: Generate random 256-bit passphrase
-    ReMemory->>Age: Encrypt manifest/ folder
-    Age-->>ReMemory: MANIFEST.age
-    ReMemory->>Shamir: Split passphrase (3-of-5)
-    Shamir-->>ReMemory: 5 unique shares
-    ReMemory->>ReMemory: Create share files with checksums
-    ReMemory-->>You: Ready to distribute!
-```
-
-### How Shamir's Secret Sharing Works
-
-```mermaid
-graph LR
-    A[Your Secrets] --> B[Encrypt with age]
-    B --> C[Split key into 5 shares]
-    C --> D1[Alice gets share 1]
-    C --> D2[Bob gets share 2]
-    C --> D3[Carol gets share 3]
-    C --> D4[David gets share 4]
-    C --> D5[Eve gets share 5]
-
-    D1 & D2 & D3 -.->|Any 3 of 5| E[Reconstruct key]
-    E --> F[Decrypt secrets]
-```
-
-The key insight: any 3 shares can reconstruct the key, but 2 shares reveal nothing. Not "very little"—mathematically zero information.
-
 ## Installation
 
 ### From GitHub Releases
 
 Download the latest binary for your platform from [Releases](https://github.com/eljojo/rememory/releases).
 
-### From Source
+### With Go
 
 ```bash
-git clone https://github.com/eljojo/rememory
-cd rememory
-make build
-./rememory --version
+go install github.com/eljojo/rememory/cmd/rememory@latest
 ```
+
+Optionally, generate man pages:
+
+```bash
+mkdir -p ~/.local/share/man/man1
+rememory doc ~/.local/share/man/man1
+```
+
+<details>
+<summary>With Nix</summary>
+
+Run directly without installing:
+
+```bash
+nix run github:eljojo/rememory
+```
+
+Or add to your flake inputs:
+
+```nix
+{
+  inputs.rememory.url = "github:eljojo/rememory";
+  inputs.rememory.inputs.nixpkgs.follows = "nixpkgs";
+}
+```
+
+Then include in your NixOS configuration:
+
+```nix
+# configuration.nix
+{ inputs, ... }:
+{
+  environment.systemPackages = [ inputs.rememory.packages.${system}.default ];
+}
+```
+
+Or in home-manager:
+
+```nix
+# home.nix
+{ inputs, ... }:
+{
+  home.packages = [ inputs.rememory.packages.${system}.default ];
+}
+```
+
+</details>
 
 ## Quick Start
 
@@ -247,7 +173,154 @@ Send each friend their bundle. Each bundle contains:
 
 **A single share reveals absolutely nothing.** But tell your friends to keep their bundle safe anyway—it's their responsibility to you.
 
-## What Friends Receive
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `rememory init <name>` | Create a new project |
+| `rememory seal` | Encrypt manifest and create shares |
+| `rememory bundle` | Generate distribution bundles |
+| `rememory status` | Show project status |
+| `rememory verify-bundle <zip>` | Verify a bundle's integrity |
+| `rememory recover` | Recover secrets from shares |
+
+<details>
+<summary>Threat Model</summary>
+
+ReMemory assumes:
+- Your friends will only cooperate after you're gone (or when needed)
+- At least *threshold* friends will keep their bundle safe
+- Your computer is trusted at the time you run `seal`
+- The browser used for recovery is not compromised at recovery time
+
+ReMemory does NOT rely on:
+- Any server or cloud service
+- Any ReMemory website or infrastructure
+- Any long-term availability of this project
+- The internet during recovery
+
+</details>
+
+<details>
+<summary>How It Works</summary>
+
+### What Your Friends Do (Recovery)
+
+When the time comes, your friends gather and use `recover.html`:
+
+```mermaid
+sequenceDiagram
+    participant Alice
+    participant Bob
+    participant Carol
+    participant Browser as recover.html
+    participant WASM as Go WASM
+
+    Alice->>Browser: Opens recover.html
+    Alice->>Browser: Drops README.txt (contains her share)
+    Bob->>Browser: Drops README.txt (contains his share)
+    Carol->>Browser: Drops README.txt (contains her share)
+    Browser->>WASM: Combine 3 shares
+    WASM-->>Browser: Reconstructed passphrase
+    Browser->>WASM: Decrypt MANIFEST.age
+    WASM-->>Browser: Decrypted files
+    Browser-->>Alice: Download recovered files
+```
+
+Everything happens locally in the browser. No data leaves their computer.
+
+### What You Do (Sealing)
+
+When you run `rememory seal`:
+
+```mermaid
+sequenceDiagram
+    participant You
+    participant ReMemory
+    participant Age as age encryption
+    participant Shamir as Shamir's Secret Sharing
+
+    You->>ReMemory: rememory seal
+    ReMemory->>ReMemory: Generate random 256-bit passphrase
+    ReMemory->>Age: Encrypt manifest/ folder
+    Age-->>ReMemory: MANIFEST.age
+    ReMemory->>Shamir: Split passphrase (3-of-5)
+    Shamir-->>ReMemory: 5 unique shares
+    ReMemory->>ReMemory: Create share files with checksums
+    ReMemory-->>You: Ready to distribute!
+```
+
+### How Shamir's Secret Sharing Works
+
+```mermaid
+graph LR
+    A[Your Secrets] --> B[Encrypt with age]
+    B --> C[Split key into 5 shares]
+    C --> D1[Alice gets share 1]
+    C --> D2[Bob gets share 2]
+    C --> D3[Carol gets share 3]
+    C --> D4[David gets share 4]
+    C --> D5[Eve gets share 5]
+
+    D1 & D2 & D3 -.->|Any 3 of 5| E[Reconstruct key]
+    E --> F[Decrypt secrets]
+```
+
+The key insight: any 3 shares can reconstruct the key, but 2 shares reveal nothing. Not "very little"—mathematically zero information.
+
+</details>
+
+<details>
+<summary>Cryptographic Guarantees</summary>
+
+| Component | Algorithm |
+|-----------|-----------|
+| Encryption | [age](https://github.com/FiloSottile/age) (scrypt passphrase mode) |
+| Key derivation | scrypt (N=2²⁰, r=8, p=1) |
+| Secret sharing | Shamir's Secret Sharing over GF(2⁸) |
+| Integrity | SHA-256 checksums |
+| Passphrase | 256 bits from crypto/rand |
+
+**A single share reveals absolutely nothing about your secret, even to a cryptography expert.** This is a mathematical guarantee of Shamir's Secret Sharing—any fewer than *threshold* shares contains zero information about the original secret.
+
+</details>
+
+<details>
+<summary>Failure Scenarios</summary>
+
+| What if... | Result |
+|------------|--------|
+| A friend loses their bundle? | Fine, as long as threshold friends remain |
+| A friend leaks their share publicly? | Harmless without threshold-1 other shares |
+| ReMemory disappears in 10 years? | `recover.html` still works—it's self-contained |
+| Browsers change dramatically? | `recover.html` is plain HTML + WASM with no external dependencies |
+| You forget how this works? | Each bundle's README.txt explains everything |
+| Some friends can't be reached? | That's why you set threshold below total friends |
+
+</details>
+
+<details>
+<summary>Why ReMemory?</summary>
+
+We all have digital secrets that matter: password manager recovery codes, cryptocurrency seeds, important documents, or instructions for loved ones. What happens to these if you're suddenly unavailable?
+
+Traditional approaches fail:
+- **Give one person everything** → Single point of failure and trust
+- **Split files manually** → Confusing, error-prone, no encryption
+- **Use a password manager's emergency access** → Relies on company existing
+- **Write it in a will** → Becomes public record, slow legal process
+
+ReMemory solves this with cryptographic guarantees:
+
+- **No single point of failure** — Your secrets require multiple friends to cooperate
+- **No trust in any one person** — Even your most trusted friend can't access secrets alone
+- **Offline and self-contained** — Recovery works without internet, servers, or ReMemory itself
+- **Designed for non-technical friends to succeed under stress** — Clear instructions, not cryptographic puzzles
+
+</details>
+
+<details>
+<summary>What Friends Receive</summary>
 
 Each friend's README.txt contains everything they need:
 
@@ -257,11 +330,15 @@ Each friend's README.txt contains everything they need:
                               For: Alice
 ================================================================================
 
-!! YOU CANNOT USE THIS FILE ALONE !!
-   You will need help from other friends listed below.
+!!  YOU CANNOT USE THIS FILE ALONE
+    You will need help from other friends listed below.
 
-!! CONFIDENTIAL - DO NOT SHARE THIS FILE !!
-   This document contains your secret share. Keep it safe.
+!!  CONFIDENTIAL - DO NOT SHARE THIS FILE
+    This document contains your secret share. Keep it safe.
+
+    NOTA PARA HISPANOHABLANTES:
+    Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial
+    para que te ayude a entender estas instrucciones y recuperar los datos.
 
 --------------------------------------------------------------------------------
 WHAT IS THIS?
@@ -269,6 +346,14 @@ WHAT IS THIS?
 This bundle allows you to help recover encrypted secrets.
 You are one of 5 trusted friends who hold pieces of the recovery key.
 At least 3 of you must cooperate to decrypt the contents.
+
+--------------------------------------------------------------------------------
+OTHER SHARE HOLDERS (contact to coordinate recovery)
+--------------------------------------------------------------------------------
+Bob - bob@example.com - 555-2345
+Carol - carol@example.com
+David - david@example.com - 555-4567
+Eve - eve@example.com
 
 --------------------------------------------------------------------------------
 HOW TO RECOVER (PRIMARY METHOD - Browser)
@@ -292,30 +377,12 @@ Threshold: 3
 Holder: Alice
 ...
 -----END REMEMORY SHARE-----
-
---------------------------------------------------------------------------------
-OTHER SHARE HOLDERS (contact to coordinate recovery)
---------------------------------------------------------------------------------
-Bob - bob@example.com - 555-2345
-Carol - carol@example.com
-David - david@example.com - 555-4567
-Eve - eve@example.com
 ```
 
-## Verification
+</details>
 
-You can verify the integrity of any bundle without trusting ReMemory:
-
-```bash
-rememory verify-bundle bundle-alice.zip
-```
-
-This checks:
-- All required files are present
-- Checksums match the values in README.txt
-- The embedded share is valid and parseable
-
-## Recovery Methods
+<details>
+<summary>Recovery Methods</summary>
 
 ### Browser Recovery (Recommended)
 
@@ -338,36 +405,10 @@ rememory recover \
   --output recovered/
 ```
 
-## Project Structure
+</details>
 
-```
-my-recovery-2026/
-├── project.yml           # Configuration (friends, threshold)
-├── manifest/             # Your secret files (ADD FILES HERE)
-│   ├── README.md
-│   └── ... your files ...
-└── output/
-    ├── MANIFEST.age      # Encrypted archive
-    ├── shares/           # Individual share files
-    │   ├── SHARE-alice.txt
-    │   └── ...
-    └── bundles/          # Distribution packages
-        ├── bundle-alice.zip
-        └── ...
-```
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `rememory init <name>` | Create a new project |
-| `rememory seal` | Encrypt manifest and create shares |
-| `rememory bundle` | Generate distribution bundles |
-| `rememory status` | Show project status |
-| `rememory verify-bundle <zip>` | Verify a bundle's integrity |
-| `rememory recover` | Recover secrets from shares |
-
-## Best Practices
+<details>
+<summary>Best Practices</summary>
 
 ### Choosing Friends
 
@@ -396,7 +437,60 @@ Consider creating a new project every 2-3 years:
 
 Use `rememory init new-project --from old-project` to copy friend configuration.
 
-## Development
+</details>
+
+<details>
+<summary>Project Structure</summary>
+
+```
+my-recovery-2026/
+├── project.yml           # Configuration (friends, threshold)
+├── manifest/             # Your secret files (ADD FILES HERE)
+│   ├── README.md
+│   └── ... your files ...
+└── output/
+    ├── MANIFEST.age      # Encrypted archive
+    ├── shares/           # Individual share files
+    │   ├── SHARE-alice.txt
+    │   └── ...
+    └── bundles/          # Distribution packages
+        ├── bundle-alice.zip
+        └── ...
+```
+
+</details>
+
+<details>
+<summary>Verification</summary>
+
+You can verify the integrity of any bundle without trusting ReMemory:
+
+```bash
+rememory verify-bundle bundle-alice.zip
+```
+
+This checks:
+- All required files are present
+- Checksums match the values in README.txt
+- The embedded share is valid and parseable
+
+</details>
+
+<details>
+<summary>Why I Built This</summary>
+
+Two things drove me to create ReMemory.
+
+First, I watched [a documentary about Clive Wearing](https://www.youtube.com/watch?v=k_P7Y0-wgos), a man who has lived with a 7-second memory since 1985. Seeing how fragile memory can be—how a single moment can permanently change everything—made me think about what would happen to my digital life if something similar happened to me.
+
+Second, I've had several concussions from cycling accidents. Each time, I've been lucky to recover fully. But each time, I've also been reminded that our brains are more fragile than we like to think. What if the next accident is different?
+
+ReMemory is my answer to these questions: a way to ensure the people I trust can access what matters, even if I can't help them.
+
+</details>
+
+<details>
+<summary>Development</summary>
 
 ```bash
 make build        # Build binary
@@ -404,6 +498,8 @@ make test         # Run unit tests
 make test-e2e     # Run browser tests (requires: npm install)
 make build-all    # Cross-compile for all platforms
 ```
+
+</details>
 
 ## License
 
@@ -415,3 +511,5 @@ ReMemory implements a protocol built on:
 - [age](https://github.com/FiloSottile/age) — Modern file encryption by Filippo Valsorda
 - [HashiCorp Vault's Shamir implementation](https://github.com/hashicorp/vault) — Battle-tested secret sharing
 - [Cobra](https://github.com/spf13/cobra) — CLI framework
+
+The protocol was [originally designed in a Google Doc](https://docs.google.com/document/d/1B4_wIN3fXqb67Tln0v5v2pMRFf8v5umkKikaqCRAdyM/edit?usp=sharing) in 2023.

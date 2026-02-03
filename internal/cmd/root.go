@@ -9,8 +9,8 @@ var version = "dev"
 
 var rootCmd = &cobra.Command{
 	Use:   "rememory",
-	Short: "Encrypt secrets and split access among trusted friends",
-	Long: `ReMemory encrypts a manifest of secrets with age, splits the passphrase
+	Short: "🧠 Encrypt secrets and split access among trusted friends",
+	Long: `🧠 ReMemory encrypts a manifest of secrets with age, splits the passphrase
 using Shamir's Secret Sharing, and creates recovery bundles for trusted friends.
 
 Create a project:    rememory init my-recovery

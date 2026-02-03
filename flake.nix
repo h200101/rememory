@@ -26,7 +26,7 @@
           version = "0.1.0";
           src = ./.;
 
-          vendorHash = "sha256-u11OiL0ZRo1eTh3jcYp1e92vKRGpFav7N8Vc1HrnO40=";
+          vendorHash = "sha256-4voapYXaf792sNI/P2Uj7ujs4x2r0vkb1bzLXr5Y14I=";
           proxyVendor = true; # Download deps during build instead of vendoring
 
           # Build WASM first
@@ -35,6 +35,12 @@
             GOOS=js GOARCH=wasm go build -o internal/html/assets/recover.wasm ./internal/wasm
             cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" internal/html/assets/ 2>/dev/null || \
             cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" internal/html/assets/ 2>/dev/null || true
+          '';
+
+          # Generate and install man pages
+          postInstall = ''
+            mkdir -p $out/share/man/man1
+            $out/bin/rememory doc $out/share/man/man1
           '';
 
           subPackages = [ "cmd/rememory" ];

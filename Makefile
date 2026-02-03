@@ -1,4 +1,4 @@
-.PHONY: build test test-e2e test-e2e-headed lint clean install wasm build-all bump-patch bump-minor bump-major
+.PHONY: build test test-e2e test-e2e-headed lint clean install wasm build-all bump-patch bump-minor bump-major man
 
 BINARY := rememory
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -45,7 +45,13 @@ lint:
 clean:
 	rm -f $(BINARY) coverage.out coverage.html
 	rm -f internal/html/assets/recover.wasm
-	rm -rf dist/
+	rm -rf dist/ man/
+
+# Generate man pages
+man: build
+	@mkdir -p man
+	./$(BINARY) doc man
+	@echo "View with: man ./man/rememory.1"
 
 # Cross-compile for all platforms (used by CI)
 build-all: wasm
