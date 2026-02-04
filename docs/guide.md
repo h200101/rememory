@@ -38,6 +38,7 @@ Download the latest binary for your platform from [Releases](https://github.com/
 
 ```bash
 go install github.com/eljojo/rememory/cmd/rememory@latest
+```
 
 Optionally, generate man pages:
 
@@ -48,6 +49,8 @@ rememory doc ~/.local/share/man/man1
 
 ### With Nix
 
+Run directly without installing:
+
 ```bash
 nix run github:eljojo/rememory
 ```
@@ -55,9 +58,6 @@ nix run github:eljojo/rememory
 <details>
 <summary>Install</summary>
 
-Run directly without installing:
-
-```bash
 Add to your flake inputs:
 
 ```nix
@@ -88,7 +88,7 @@ Or in home-manager:
 ```
 
 </details>
-```
+
 
 ## Creating Your First Project
 
