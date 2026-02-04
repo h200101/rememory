@@ -22,16 +22,9 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
       - name: Install dependencies
         run: |
           go mod download
-          npm ci
 
       - name: Build WASM
         run: make wasm
@@ -41,6 +34,11 @@ jobs:
 
       - name: Build binaries
         run: make build-all
+
+      - name: Generate standalone HTML files
+        run: |
+          ./dist/rememory-linux-amd64 html create > dist/rememory.html
+          ./dist/rememory-linux-amd64 html recover > dist/recover.html
 
       - name: Generate demo bundles
         run: |
@@ -74,4 +72,6 @@ jobs:
             dist/rememory-windows-amd64.exe
             dist/demo-bundles.zip
             dist/checksums.txt
+            dist/rememory.html
+            dist/recover.html
           generate_release_notes: true
