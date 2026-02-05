@@ -1,4 +1,4 @@
-.PHONY: build test test-e2e test-e2e-headed lint clean install wasm build-all bump-patch bump-minor bump-major man html serve
+.PHONY: build test test-e2e test-e2e-headed lint clean install wasm ts build-all bump-patch bump-minor bump-major man html serve
 
 BINARY := rememory
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
@@ -8,10 +8,17 @@ LDFLAGS := -ldflags "-s -w -X main.version=$(VERSION)"
 build: wasm
 	go build $(LDFLAGS) -o $(BINARY) ./cmd/rememory
 
+# Compile TypeScript to JavaScript (bundled as IIFE for inline use)
+ts:
+	@echo "Compiling TypeScript..."
+	esbuild internal/html/assets/src/shared.ts --bundle --format=iife --global-name=_shared --outfile=internal/html/assets/shared.js --target=es2020
+	esbuild internal/html/assets/src/app.ts --bundle --format=iife --outfile=internal/html/assets/app.js --target=es2020
+	esbuild internal/html/assets/src/create-app.ts --bundle --format=iife --outfile=internal/html/assets/create-app.js --target=es2020
+
 # Build WASM modules
 # - recover.wasm: Small, recovery-only (for bundles)
 # - create.wasm: Full, includes bundle creation logic (for maker.html)
-wasm:
+wasm: ts
 	@mkdir -p internal/html/assets
 	@echo "Building recover.wasm (recovery only)..."
 	GOOS=js GOARCH=wasm go build -o internal/html/assets/recover.wasm ./internal/wasm
@@ -50,6 +57,7 @@ lint:
 clean:
 	rm -f $(BINARY) coverage.out coverage.html
 	rm -f internal/html/assets/recover.wasm internal/html/assets/create.wasm
+	rm -f internal/html/assets/app.js internal/html/assets/create-app.js internal/html/assets/shared.js internal/html/assets/types.js
 	rm -rf dist/ man/
 
 # Generate man pages

@@ -1,6 +1,9 @@
 /rememory
 /internal/html/assets/recover.wasm
 /internal/html/assets/create.wasm
+/internal/html/assets/app.js
+/internal/html/assets/create-app.js
+/internal/html/assets/shared.js
 /node_modules/
 /e2e/playwright-report/
 /test-results/

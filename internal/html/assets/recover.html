@@ -530,12 +530,12 @@
 
   <!-- Embedded WASM binary (base64) -->
   <script>
-    const WASM_BINARY = "{{WASM_BASE64}}";
+    window.WASM_BINARY = "{{WASM_BASE64}}";
   </script>
 
   <!-- Personalization data (embedded for this specific friend) -->
   <script>
-    const PERSONALIZATION = {{PERSONALIZATION_DATA}};
+    window.PERSONALIZATION = {{PERSONALIZATION_DATA}};
   </script>
 
   <!-- Application logic (must come after WASM_BINARY and PERSONALIZATION) -->

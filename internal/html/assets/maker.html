@@ -770,9 +770,9 @@
 
   <!-- Embedded WASM binary (base64) -->
   <script>
-    const WASM_BINARY = "{{WASM_BASE64}}";
-    const VERSION = "{{VERSION}}";
-    const GITHUB_URL = "{{GITHUB_URL}}";
+    window.WASM_BINARY = "{{WASM_BASE64}}";
+    window.VERSION = "{{VERSION}}";
+    window.GITHUB_URL = "{{GITHUB_URL}}";
   </script>
 
   <!-- Application logic -->
@@ -784,7 +784,7 @@
       const go = new Go();
       try {
         // Decode base64 to get gzip-compressed data
-        const compressed = Uint8Array.from(atob(WASM_BINARY), c => c.charCodeAt(0));
+        const compressed = Uint8Array.from(atob(window.WASM_BINARY), c => c.charCodeAt(0));
 
         // Decompress using DecompressionStream (modern browsers)
         let bytes;

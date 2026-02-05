@@ -29,12 +29,11 @@
           vendorHash = "sha256-4voapYXaf792sNI/P2Uj7ujs4x2r0vkb1bzLXr5Y14I=";
           proxyVendor = true; # Download deps during build instead of vendoring
 
-          # Build WASM first
+          nativeBuildInputs = [ pkgs.esbuild pkgs.gnumake ];
+
+          # Build TypeScript and WASM using Makefile
           preBuild = ''
-            mkdir -p internal/html/assets
-            GOOS=js GOARCH=wasm go build -o internal/html/assets/recover.wasm ./internal/wasm
-            cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" internal/html/assets/ 2>/dev/null || \
-            cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" internal/html/assets/ 2>/dev/null || true
+            make wasm
           '';
 
           # Generate and install man pages
@@ -110,6 +109,7 @@
           packages = [
             pkgs.go
             pkgs.nodejs
+            pkgs.esbuild
             pkgs.playwright-test
           ];
           shellHook = ''
