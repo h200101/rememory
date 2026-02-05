@@ -200,6 +200,25 @@ make serve        # Serves at http://localhost:8000
 
 </details>
 
+## Similar Tools
+
+ReMemory isn't the first tool to use Shamir's Secret Sharing for file protection. I built ReMemory before discovering these alternatives:
+
+- **[Horcrux](https://github.com/jesseduffield/horcrux)** — CLI tool that splits files into encrypted fragments using Shamir's Secret Sharing
+- **[Haystack](https://github.com/henrysdev/Haystack)** — Elixir-based CLI for fragmenting confidential documents
+
+**The key difference:** ReMemory is designed for non-technical people to perform the recovery.
+
+With Horcrux or Haystack, your friends need to install software and run command-line tools to reconstruct your secrets. That's fine if your friends are developers, but most people's trusted circle includes family members, partners, or friends who've never opened a terminal.
+
+ReMemory solves this by providing:
+- **PDF instructions** — printable, readable, no technical knowledge required
+- **ZIP bundles** — a familiar format anyone can open
+- **Browser-based recovery** — just open `recover.html`, no installation needed
+- **Self-contained offline tool** — works without internet, servers, or this project existing
+
+The cryptographic foundation is the same. The difference is who can actually use it when you need them to.
+
 ## License
 
 Apache-2.0 — Copyright 2026 José Albornoz
