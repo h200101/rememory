@@ -297,6 +297,9 @@
   </style>
 </head>
 <body>
+  <!-- Toast notifications container -->
+  <div id="toast-container" class="toast-container" role="alert" aria-live="polite"></div>
+
   <!-- Loading overlay -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="spinner"></div>
@@ -473,7 +476,22 @@
         download: "Download",
         bundle_for: "Bundle for {0}",
         import_success: "Imported {0} contacts",
-        import_error: "Failed to parse YAML: {0}"
+        import_error: "Failed to parse YAML: {0}",
+        // Error messages with guidance
+        error_title: "Something went wrong",
+        error_not_ready_title: "Not ready yet",
+        error_not_ready_message: "The bundle creator is still loading.",
+        error_not_ready_guidance: "Please wait a moment and try again.",
+        error_import_title: "Import failed",
+        error_import_guidance: "Make sure the YAML format is correct. Check for proper indentation and that all required fields (name, email) are present.",
+        error_min_friends_title: "Minimum friends required",
+        error_min_friends_guidance: "Recovery requires at least 2 friends to split the secret. Add more friends to continue.",
+        error_generate_title: "Bundle creation failed",
+        error_generate_guidance: "Check that all friends have names and emails, and that you've selected at least one file. Then try again.",
+        action_try_again: "Try again",
+        validation_title: "Some fields need attention",
+        validation_message: "Please fill in the highlighted fields before generating bundles.",
+        validation_guidance: "Required fields are marked with an asterisk (*). Make sure each friend has a name and email, and you've added at least one file."
       },
 
       es: {
@@ -529,7 +547,21 @@
         bundle_for: "Sobre para {0}",
 
         import_success: "Se importaron {0} contactos",
-        import_error: "Error al leer el YAML: {0}"
+        import_error: "Error al leer el YAML: {0}",
+        error_title: "Algo salió mal",
+        error_not_ready_title: "Aún no está listo",
+        error_not_ready_message: "El creador de sobres todavía está cargando.",
+        error_not_ready_guidance: "Por favor espera un momento e intenta de nuevo.",
+        error_import_title: "Error en la importación",
+        error_import_guidance: "Asegúrate de que el formato YAML sea correcto. Verifica la indentación y que todos los campos requeridos (nombre, correo) estén presentes.",
+        error_min_friends_title: "Mínimo de amigos requerido",
+        error_min_friends_guidance: "La recuperación requiere al menos 2 amigos para dividir el secreto. Agrega más amigos para continuar.",
+        error_generate_title: "Error al crear sobres",
+        error_generate_guidance: "Verifica que todos los amigos tengan nombre y correo, y que hayas seleccionado al menos un archivo. Luego intenta de nuevo.",
+        action_try_again: "Intentar de nuevo",
+        validation_title: "Algunos campos necesitan atención",
+        validation_message: "Por favor completa los campos resaltados antes de generar los sobres.",
+        validation_guidance: "Los campos obligatorios están marcados con un asterisco (*). Asegúrate de que cada amigo tenga nombre y correo, y de haber agregado al menos un archivo."
       },
 
       de: {
@@ -585,7 +617,21 @@
         bundle_for: "Umschlag für {0}",
 
         import_success: "{0} Kontakte importiert",
-        import_error: "YAML konnte nicht verarbeitet werden: {0}"
+        import_error: "YAML konnte nicht verarbeitet werden: {0}",
+        error_title: "Etwas ist schiefgelaufen",
+        error_not_ready_title: "Noch nicht bereit",
+        error_not_ready_message: "Der Umschlag-Ersteller wird noch geladen.",
+        error_not_ready_guidance: "Bitte warte einen Moment und versuche es erneut.",
+        error_import_title: "Import fehlgeschlagen",
+        error_import_guidance: "Stelle sicher, dass das YAML-Format korrekt ist. Überprüfe die Einrückung und ob alle erforderlichen Felder (Name, E-Mail) vorhanden sind.",
+        error_min_friends_title: "Mindestanzahl an Freunden erforderlich",
+        error_min_friends_guidance: "Für die Wiederherstellung werden mindestens 2 Freunde benötigt, um das Geheimnis aufzuteilen. Füge weitere Freunde hinzu, um fortzufahren.",
+        error_generate_title: "Umschlag-Erstellung fehlgeschlagen",
+        error_generate_guidance: "Überprüfe, ob alle Freunde Namen und E-Mail haben und ob du mindestens eine Datei ausgewählt hast. Versuche es dann erneut.",
+        action_try_again: "Erneut versuchen",
+        validation_title: "Einige Felder benötigen Aufmerksamkeit",
+        validation_message: "Bitte fülle die markierten Felder aus, bevor du Umschläge erstellst.",
+        validation_guidance: "Pflichtfelder sind mit einem Sternchen (*) gekennzeichnet. Stelle sicher, dass jeder Freund einen Namen und eine E-Mail hat und du mindestens eine Datei hinzugefügt hast."
       },
 
       fr: {
@@ -641,7 +687,21 @@
         bundle_for: "Enveloppe pour {0}",
 
         import_success: "{0} contacts importés",
-        import_error: "Impossible d’analyser le YAML : {0}"
+        import_error: "Impossible d'analyser le YAML : {0}",
+        error_title: "Une erreur s'est produite",
+        error_not_ready_title: "Pas encore prêt",
+        error_not_ready_message: "Le créateur d'enveloppes est encore en cours de chargement.",
+        error_not_ready_guidance: "Veuillez patienter un moment et réessayer.",
+        error_import_title: "Échec de l'importation",
+        error_import_guidance: "Assurez-vous que le format YAML est correct. Vérifiez l'indentation et que tous les champs requis (nom, e-mail) sont présents.",
+        error_min_friends_title: "Nombre minimum d'amis requis",
+        error_min_friends_guidance: "La récupération nécessite au moins 2 amis pour diviser le secret. Ajoutez plus d'amis pour continuer.",
+        error_generate_title: "Échec de la création des enveloppes",
+        error_generate_guidance: "Vérifiez que tous les amis ont un nom et un e-mail, et que vous avez sélectionné au moins un fichier. Réessayez ensuite.",
+        action_try_again: "Réessayer",
+        validation_title: "Certains champs nécessitent votre attention",
+        validation_message: "Veuillez remplir les champs en surbrillance avant de créer les enveloppes.",
+        validation_guidance: "Les champs obligatoires sont marqués d'un astérisque (*). Assurez-vous que chaque ami a un nom et un e-mail, et que vous avez ajouté au moins un fichier."
       }
     };
 
@@ -759,9 +819,21 @@
         const result = await WebAssembly.instantiate(bytes.buffer, go.importObject);
         go.run(result.instance);
       } catch (err) {
-        console.error('Failed to load WASM:', err);
-        document.getElementById('loading-overlay').innerHTML =
-          '<p style="color: #dc3545;">Failed to load bundle creator.<br>Please use the CLI tool instead.</p>';
+        // Show user-friendly error with guidance
+        document.getElementById('loading-overlay').innerHTML = `
+          <div class="loading-error">
+            <div class="loading-error-icon">⚠️</div>
+            <div class="loading-error-title">Failed to load bundle creator</div>
+            <div class="loading-error-message">
+              The bundle creation module couldn't be loaded in your browser.
+              This can happen with older browsers or certain privacy settings.
+            </div>
+            <div class="loading-error-actions">
+              <button class="btn btn-primary" onclick="window.location.reload()">Reload page</button>
+              <a href="https://github.com/eljojo/rememory" class="btn btn-secondary" target="_blank">Use CLI tool instead</a>
+            </div>
+          </div>
+        `;
       }
     })();
   </script>

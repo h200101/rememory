@@ -18,8 +18,8 @@ func GenerateMakerHTML(createWASMBytes []byte, version, githubURL string) string
 	// Embed wasm_exec.js
 	html = strings.Replace(html, "{{WASM_EXEC}}", wasmExecJS, 1)
 
-	// Embed create-app.js
-	html = strings.Replace(html, "{{CREATE_APP_JS}}", createAppJS, 1)
+	// Embed shared.js + create-app.js
+	html = strings.Replace(html, "{{CREATE_APP_JS}}", sharedJS+"\n"+createAppJS, 1)
 
 	// Embed create.wasm as gzip-compressed base64 (this runs in the browser)
 	// Note: create.wasm contains recover.wasm embedded within it for generating bundles

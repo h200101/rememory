@@ -3,6 +3,9 @@
 (function() {
   'use strict';
 
+  // Import shared utilities
+  const { escapeHtml, formatSize, toast } = window.rememoryUtils;
+
   const sampleNames = [
     'Catalina', 'Matthias', 'Sophie', 'Joaquín', 'Emma',
     'Francisca', 'Liam', 'Hannah', 'Sebastián', 'Olivia'
@@ -98,13 +101,19 @@
       if (!yaml) return;
 
       if (!state.wasmReady) {
-        showError(t('error', 'WASM not ready'));
+        toast.warning(t('error_not_ready_title'), t('error_not_ready_message'), t('error_not_ready_guidance'));
         return;
       }
 
       const result = window.rememoryParseProjectYAML(yaml);
       if (result.error) {
-        showError(t('import_error', result.error));
+        showError(
+          t('import_error', result.error),
+          {
+            title: t('error_import_title'),
+            guidance: t('error_import_guidance')
+          }
+        );
         return;
       }
 
@@ -158,12 +167,12 @@
     entry.innerHTML = `
       <div class="friend-number">#${index + 1}</div>
       <div class="field">
-        <label>${t('name_label')}</label>
-        <input type="text" class="friend-name" value="${escapeHtml(name)}" placeholder="${sampleName}">
+        <label class="required">${t('name_label')}</label>
+        <input type="text" class="friend-name" value="${escapeHtml(name)}" placeholder="${sampleName}" required>
       </div>
       <div class="field">
-        <label>${t('email_label')}</label>
-        <input type="email" class="friend-email" value="${escapeHtml(email)}" placeholder="${sampleEmail}">
+        <label class="required">${t('email_label')}</label>
+        <input type="email" class="friend-email" value="${escapeHtml(email)}" placeholder="${sampleEmail}" required>
       </div>
       <div class="field">
         <label>${t('phone_label')}</label>
@@ -175,11 +184,13 @@
     // Add event listeners
     entry.querySelector('.friend-name').addEventListener('input', (e) => {
       state.friends[index].name = e.target.value.trim();
+      e.target.classList.remove('input-error'); // Clear error on input
       checkGenerateReady();
     });
 
     entry.querySelector('.friend-email').addEventListener('input', (e) => {
       state.friends[index].email = e.target.value.trim();
+      e.target.classList.remove('input-error'); // Clear error on input
       checkGenerateReady();
     });
 
@@ -198,7 +209,11 @@
 
   function removeFriend(index) {
     if (state.friends.length <= 2) {
-      showError(t('validation_min_friends'));
+      toast.warning(
+        t('error_min_friends_title'),
+        t('validation_min_friends'),
+        t('error_min_friends_guidance')
+      );
       return;
     }
 
@@ -326,6 +341,11 @@
 
   // Load files into state (appends to existing files)
   async function loadFiles(filesWithPaths) {
+    // Clear any file-related errors
+    elements.filesDropZone.classList.remove('has-error');
+    const existingFilesError = elements.filesDropZone.parentNode.querySelector('.inline-error');
+    if (existingFilesError) existingFilesError.remove();
+
     // Get existing file paths to avoid duplicates
     const existingPaths = new Set(state.files.map(f => f.name));
 
@@ -397,13 +417,26 @@
   }
 
   function checkGenerateReady() {
-    const valid = validateInputs(true); // Silent validation
-    elements.generateBtn.disabled = !valid || !state.wasmReady || state.generating;
+    // Button stays enabled - validation happens on click
+    elements.generateBtn.disabled = !state.wasmReady || state.generating;
   }
 
   function validateInputs(silent = false) {
     let valid = true;
     let errors = [];
+    let firstInvalidElement = null;
+
+    // Clear previous inline errors
+    document.querySelectorAll('.friend-entry').forEach(entry => {
+      entry.querySelectorAll('input').forEach(input => {
+        input.classList.remove('input-error');
+      });
+      const existingError = entry.querySelector('.field-error');
+      if (existingError) existingError.remove();
+    });
+    elements.filesDropZone.classList.remove('has-error');
+    const existingFilesError = elements.filesDropZone.parentNode.querySelector('.inline-error');
+    if (existingFilesError) existingFilesError.remove();
 
     // Friends
     if (state.friends.length < 2) {
@@ -411,13 +444,26 @@
       if (!silent) errors.push(t('validation_min_friends'));
     } else {
       state.friends.forEach((f, i) => {
+        const entry = elements.friendsList.children[i];
+        if (!entry) return;
+
         if (!f.name) {
           valid = false;
-          if (!silent) errors.push(t('validation_friend_name', i + 1));
+          if (!silent) {
+            errors.push(t('validation_friend_name', i + 1));
+            const nameInput = entry.querySelector('.friend-name');
+            nameInput.classList.add('input-error');
+            if (!firstInvalidElement) firstInvalidElement = nameInput;
+          }
         }
         if (!f.email) {
           valid = false;
-          if (!silent) errors.push(t('validation_friend_email', i + 1, f.name || '?'));
+          if (!silent) {
+            errors.push(t('validation_friend_email', i + 1, f.name || '?'));
+            const emailInput = entry.querySelector('.friend-email');
+            emailInput.classList.add('input-error');
+            if (!firstInvalidElement) firstInvalidElement = emailInput;
+          }
         }
       });
     }
@@ -425,12 +471,29 @@
     // Files
     if (state.files.length === 0) {
       valid = false;
-      if (!silent) errors.push(t('validation_no_files'));
+      if (!silent) {
+        errors.push(t('validation_no_files'));
+        elements.filesDropZone.classList.add('has-error');
+        if (!firstInvalidElement) firstInvalidElement = elements.filesDropZone;
+      }
     }
 
     if (!silent && errors.length > 0) {
       elements.friendsValidation.textContent = errors.join('. ');
       elements.friendsValidation.classList.remove('hidden');
+
+      // Focus the first invalid element
+      if (firstInvalidElement) {
+        firstInvalidElement.focus();
+        firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      // Show a helpful toast
+      toast.warning(
+        t('validation_title'),
+        t('validation_message'),
+        t('validation_guidance')
+      );
     } else {
       elements.friendsValidation.classList.add('hidden');
     }
@@ -515,7 +578,18 @@
       elements.downloadAllSection.classList.remove('hidden');
 
     } catch (err) {
-      setStatus(t('error', err.message), 'error');
+      const errorMsg = err.message || String(err);
+      setStatus(t('error', errorMsg), 'error');
+
+      // Show helpful error toast with guidance
+      toast.error(
+        t('error_generate_title'),
+        errorMsg,
+        t('error_generate_guidance'),
+        [
+          { id: 'retry', label: t('action_try_again'), primary: true, onClick: () => generateBundles() }
+        ]
+      );
     } finally {
       state.generating = false;
       elements.generateBtn.disabled = false;
@@ -612,8 +686,9 @@
     }
   }
 
-  function showError(msg) {
-    alert(msg);
+  function showError(msg, options = {}) {
+    const { title, guidance, actions } = options;
+    toast.error(title || t('error_title'), msg, guidance, actions);
   }
 
   // Utility functions
@@ -624,18 +699,6 @@
       reader.onerror = reject;
       reader.readAsArrayBuffer(file);
     });
-  }
-
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
   }
 
   function sleep(ms) {

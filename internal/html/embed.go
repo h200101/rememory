@@ -10,6 +10,9 @@ import (
 //go:embed assets/recover.html
 var recoverHTMLTemplate string
 
+//go:embed assets/shared.js
+var sharedJS string
+
 //go:embed assets/app.js
 var appJS string
 

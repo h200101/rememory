@@ -3,6 +3,9 @@
 (function() {
   'use strict';
 
+  // Import shared utilities
+  const { escapeHtml, formatSize, toast, showInlineError, clearInlineError } = window.rememoryUtils;
+
   // State
   const state = {
     shares: [],        // Array of parsed share objects
@@ -168,11 +171,12 @@
           elements.loadingOverlay.classList.add('hidden');
           return;
         } catch (e) {
-          console.error('WASM initialization failed:', e);
-          // WASM initialization failed - will show error to user below
+          // WASM initialization failed
+          errorHandlers.wasmLoadFailed(e);
+          return;
         }
       }
-      showError(t('error', err.message));
+      errorHandlers.wasmLoadFailed(err);
     }
   }
 
@@ -288,19 +292,34 @@
   // Parse share from pasted content
   async function parseAndAddShareFromPaste(content) {
     if (!state.wasmReady) {
-      showError(t('error', 'Recovery module not ready'));
+      toast.warning(t('error_not_ready_title'), t('error_not_ready_message'), t('error_not_ready_guidance'));
       return;
     }
 
+    // Clear any previous inline errors
+    clearInlineError(elements.shareDropZone);
+
     // Check if content contains a share
     if (!shareRegex.test(content)) {
-      showError(t('paste_no_share'));
+      showError(
+        t('error_paste_no_share_message'),
+        {
+          title: t('error_paste_no_share_title'),
+          guidance: t('error_paste_no_share_guidance')
+        }
+      );
       return;
     }
 
     const result = window.rememoryParseShare(content);
     if (result.error) {
-      showError(t('error', result.error));
+      showError(
+        t('error_invalid_share_message', t('pasted_content')),
+        {
+          title: t('error_invalid_share_title'),
+          guidance: t('error_invalid_share_guidance')
+        }
+      );
       return;
     }
 
@@ -308,7 +327,7 @@
 
     // Check for duplicate index
     if (state.shares.some(s => s.index === share.index)) {
-      showError(t('duplicate', share.index));
+      errorHandlers.duplicateShare(share.index);
       return;
     }
 
@@ -325,6 +344,9 @@
 
   // Handle share file uploads
   async function handleShareFiles(files) {
+    // Clear any previous inline errors
+    clearInlineError(elements.shareDropZone);
+
     for (const file of files) {
       try {
         // Check if it's a ZIP file (bundle)
@@ -335,7 +357,7 @@
           await parseAndAddShare(content, file.name);
         }
       } catch (err) {
-        showError(t('error', 'Failed to read file'));
+        errorHandlers.fileReadFailed(file.name);
       }
     }
   }
@@ -343,7 +365,7 @@
   // Handle bundle ZIP file - extract share and optionally manifest
   async function handleBundleZip(file) {
     if (!state.wasmReady) {
-      showError(t('error', 'Recovery module not ready'));
+      toast.warning(t('error_not_ready_title'), t('error_not_ready_message'), t('error_not_ready_guidance'));
       return;
     }
 
@@ -352,7 +374,15 @@
 
     const result = window.rememoryExtractBundle(zipData);
     if (result.error) {
-      showError(t('error', result.error));
+      showError(
+        t('error_bundle_extract_message', file.name),
+        {
+          title: t('error_bundle_extract_title'),
+          guidance: t('error_bundle_extract_guidance'),
+          inline: true,
+          targetElement: elements.shareDropZone
+        }
+      );
       return;
     }
 
@@ -361,7 +391,7 @@
 
     // Check for duplicate index
     if (state.shares.some(s => s.index === share.index)) {
-      showError(t('duplicate', share.index));
+      errorHandlers.duplicateShare(share.index);
       return;
     }
 
@@ -385,19 +415,19 @@
 
   async function parseAndAddShare(content, filename) {
     if (!state.wasmReady) {
-      showError(t('error', 'Recovery module not ready'));
+      toast.warning(t('error_not_ready_title'), t('error_not_ready_message'), t('error_not_ready_guidance'));
       return;
     }
 
     // Check if content contains a share
     if (!shareRegex.test(content)) {
-      showError(t('no_share', filename));
+      errorHandlers.noShareFound(filename);
       return;
     }
 
     const result = window.rememoryParseShare(content);
     if (result.error) {
-      showError(t('invalid_share', filename, result.error));
+      errorHandlers.invalidShare(filename, result.error);
       return;
     }
 
@@ -405,7 +435,7 @@
 
     // Check for duplicate index
     if (state.shares.some(s => s.index === share.index)) {
-      showError(t('duplicate', share.index));
+      errorHandlers.duplicateShare(share.index);
       return;
     }
 
@@ -481,6 +511,9 @@
   async function handleManifestFiles(files) {
     if (files.length === 0) return;
 
+    // Clear any previous inline errors
+    clearInlineError(elements.manifestDropZone);
+
     try {
       const file = files[0];
 
@@ -490,13 +523,27 @@
         return;
       }
 
+      // Validate file extension
+      if (!file.name.endsWith('.age')) {
+        showError(
+          t('error_wrong_manifest_message', file.name),
+          {
+            title: t('error_wrong_manifest_title'),
+            guidance: t('error_wrong_manifest_guidance'),
+            inline: true,
+            targetElement: elements.manifestDropZone
+          }
+        );
+        return;
+      }
+
       const buffer = await readFileAsArrayBuffer(file);
       state.manifest = new Uint8Array(buffer);
 
       showManifestLoaded(file.name, state.manifest.length);
       checkRecoverReady();
     } catch (err) {
-      showError(t('error', err.message));
+      errorHandlers.fileReadFailed(files[0]?.name || 'file');
     }
   }
 
@@ -629,7 +676,28 @@
       state.recoveryComplete = true;
 
     } catch (err) {
-      setStatus(t('error', err.message), 'error');
+      const errorMsg = err.message || String(err);
+
+      // Determine error type and show appropriate message
+      if (errorMsg.includes('decrypt') || errorMsg.includes('passphrase') || errorMsg.includes('incorrect')) {
+        errorHandlers.decryptionFailed(err);
+        setStatus(t('error_decrypt_status'), 'error');
+      } else if (errorMsg.includes('extract') || errorMsg.includes('tar') || errorMsg.includes('gzip')) {
+        errorHandlers.extractionFailed(err);
+        setStatus(t('error_extract_status'), 'error');
+      } else {
+        // Generic error with guidance
+        toast.error(
+          t('error_recovery_title'),
+          errorMsg,
+          t('error_recovery_guidance'),
+          [
+            { id: 'retry', label: t('action_try_again'), primary: true, onClick: () => startRecovery() }
+          ]
+        );
+        setStatus(t('error', errorMsg), 'error');
+      }
+
       // On error, show steps again so user can try different shares
       if (elements.step1Card) elements.step1Card.classList.remove('collapsed');
       if (elements.step2Card) elements.step2Card.classList.remove('collapsed');
@@ -691,22 +759,102 @@
     });
   }
 
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+
+  // Error display with guidance - replaces alert()
+  function showError(msg, options = {}) {
+    const { title, guidance, actions, inline, targetElement } = options;
+
+    // If inline error requested and target exists, show inline
+    if (inline && targetElement) {
+      showInlineError(targetElement, msg, guidance);
+      return;
+    }
+
+    // Otherwise show toast
+    toast.error(title || t('error_title'), msg, guidance, actions);
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
+  // Specific error handlers with guidance
+  const errorHandlers = {
+    wasmLoadFailed(err) {
+      toast.error(
+        t('error_wasm_title'),
+        t('error_wasm_message'),
+        t('error_wasm_guidance'),
+        [
+          { id: 'reload', label: t('action_reload'), primary: true, onClick: () => window.location.reload() },
+          { id: 'cli', label: t('action_use_cli'), onClick: () => window.open('https://github.com/eljojo/rememory', '_blank') }
+        ]
+      );
+    },
 
-  function showError(msg) {
-    alert(msg); // Simple for now, could be a toast
-    // Note: Removed console.error to avoid logging sensitive information
-  }
+    invalidShare(filename, detail) {
+      showError(
+        t('error_invalid_share_message', filename),
+        {
+          title: t('error_invalid_share_title'),
+          guidance: t('error_invalid_share_guidance'),
+          inline: true,
+          targetElement: elements.shareDropZone
+        }
+      );
+    },
+
+    noShareFound(filename) {
+      showError(
+        t('error_no_share_message', filename),
+        {
+          title: t('error_no_share_title'),
+          guidance: t('error_no_share_guidance'),
+          inline: true,
+          targetElement: elements.shareDropZone
+        }
+      );
+    },
+
+    duplicateShare(index) {
+      toast.warning(
+        t('error_duplicate_title'),
+        t('error_duplicate_message', index),
+        t('error_duplicate_guidance')
+      );
+    },
+
+    fileReadFailed(filename) {
+      showError(
+        t('error_file_read_message', filename),
+        {
+          title: t('error_file_read_title'),
+          guidance: t('error_file_read_guidance')
+        }
+      );
+    },
+
+    decryptionFailed(err) {
+      toast.error(
+        t('error_decrypt_title'),
+        t('error_decrypt_message'),
+        t('error_decrypt_guidance'),
+        [
+          { id: 'retry', label: t('action_try_different_shares'), primary: true, onClick: () => {
+            // Clear shares and let user try again
+            state.shares = [];
+            state.recoveryComplete = false;
+            updateSharesUI();
+            if (elements.step1Card) elements.step1Card.classList.remove('collapsed');
+          }}
+        ]
+      );
+    },
+
+    extractionFailed(err) {
+      toast.error(
+        t('error_extract_title'),
+        t('error_extract_message'),
+        t('error_extract_guidance')
+      );
+    }
+  };
 
   // Expose function to re-render UI when language changes
   window.rememoryUpdateUI = function() {

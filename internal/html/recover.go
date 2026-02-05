@@ -38,8 +38,8 @@ func GenerateRecoverHTML(wasmBytes []byte, version, githubURL string, personaliz
 	// Embed wasm_exec.js
 	html = strings.Replace(html, "{{WASM_EXEC}}", wasmExecJS, 1)
 
-	// Embed app.js
-	html = strings.Replace(html, "{{APP_JS}}", appJS, 1)
+	// Embed shared.js + app.js
+	html = strings.Replace(html, "{{APP_JS}}", sharedJS+"\n"+appJS, 1)
 
 	// Embed WASM as gzip-compressed base64 (reduces size by ~70%)
 	wasmB64 := compressAndEncode(wasmBytes)

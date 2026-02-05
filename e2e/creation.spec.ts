@@ -76,16 +76,28 @@ test.describe('Browser Bundle Creation Tool', () => {
 
     await creation.open();
 
-    // Generate button should be disabled without required fields
-    await creation.expectGenerateDisabled();
+    // Generate button is enabled but clicking it shows validation errors
+    await creation.expectGenerateEnabled();
 
-    // Fill in first friend
+    // Click generate without filling required fields - should show validation
+    await creation.generate();
+
+    // Should show validation toast
+    await expect(page.locator('.toast-warning')).toBeVisible();
+
+    // Required fields should be highlighted
+    await expect(page.locator('.input-error').first()).toBeVisible();
+
+    // Dismiss the toast by clicking the backdrop
+    await page.locator('.toast-close').first().click();
+
+    // Fill in friends
     await creation.setFriend(0, 'Alice', 'alice@test.com');
-    await creation.expectGenerateDisabled(); // Still disabled - second friend empty
-
-    // Fill in second friend
     await creation.setFriend(1, 'Bob', 'bob@test.com');
-    await creation.expectGenerateDisabled(); // Still disabled - no files
+
+    // Click generate again without files - still should show file validation
+    await creation.generate();
+    await expect(page.locator('#files-drop-zone.has-error')).toBeVisible(); // Files drop zone should be highlighted
   });
 
   test('can import contacts from YAML', async ({ page }) => {
