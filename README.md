@@ -206,6 +206,7 @@ ReMemory isn't the first tool to use Shamir's Secret Sharing for file protection
 
 - **[Horcrux](https://github.com/jesseduffield/horcrux)** — CLI tool that splits files into encrypted fragments using Shamir's Secret Sharing
 - **[Haystack](https://github.com/henrysdev/Haystack)** — Elixir-based CLI for fragmenting confidential documents
+- **[Horcrux (nao1215)](https://github.com/nao1215/horcrux)** — TypeScript library with adapters for Node.js and React Native (requires native runtime—uses Node.js crypto and streams directly)
 
 **The key difference:** ReMemory is designed for non-technical people to perform the recovery.
 
