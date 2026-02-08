@@ -41,41 +41,42 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(20, 20, 20)
 	pdf.SetAutoPageBreak(true, 20)
+
+	// Register embedded UTF-8 TrueType fonts (DejaVu Sans)
+	registerUTF8Fonts(pdf)
+
 	pdf.AddPage()
 
-	// Translator for UTF-8 characters (Spanish accents, etc.)
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
-
 	// Title
-	pdf.SetFont("Helvetica", "B", titleSize)
+	pdf.SetFont(fontSans, "B", titleSize)
 	pdf.CellFormat(0, 10, "REMEMORY RECOVERY BUNDLE", "", 1, "C", false, 0, "")
-	pdf.SetFont("Helvetica", "", headingSize)
+	pdf.SetFont(fontSans, "", headingSize)
 	pdf.CellFormat(0, 8, fmt.Sprintf("For: %s", data.Holder), "", 1, "C", false, 0, "")
 	pdf.Ln(5)
 
 	// Warning box
 	pdf.SetFillColor(255, 240, 240)
-	pdf.SetFont("Helvetica", "B", bodySize)
+	pdf.SetFont(fontSans, "B", bodySize)
 	pdf.CellFormat(0, 7, "  !! YOU CANNOT USE THIS FILE ALONE", "", 1, "L", true, 0, "")
-	pdf.SetFont("Helvetica", "", bodySize)
+	pdf.SetFont(fontSans, "", bodySize)
 	if data.Anonymous {
 		pdf.CellFormat(0, 5, "  You will need to combine this with other shares.", "", 1, "L", true, 0, "")
 	} else {
 		pdf.CellFormat(0, 5, "  You will need help from other friends listed below.", "", 1, "L", true, 0, "")
 	}
 	pdf.Ln(2)
-	pdf.SetFont("Helvetica", "B", bodySize)
+	pdf.SetFont(fontSans, "B", bodySize)
 	pdf.CellFormat(0, 7, "  !! CONFIDENTIAL - DO NOT SHARE THIS FILE", "", 1, "L", true, 0, "")
-	pdf.SetFont("Helvetica", "", bodySize)
+	pdf.SetFont(fontSans, "", bodySize)
 	pdf.CellFormat(0, 5, "  This document contains your secret share. Keep it safe.", "", 1, "L", true, 0, "")
 	pdf.Ln(3)
 
 	// Spanish AI help note (green background, right after warning)
 	pdf.SetFillColor(220, 245, 220)
-	pdf.SetFont("Helvetica", "B", bodySize)
+	pdf.SetFont(fontSans, "B", bodySize)
 	pdf.CellFormat(0, 6, "  NOTA PARA HISPANOHABLANTES", "", 1, "L", true, 0, "")
-	pdf.SetFont("Helvetica", "I", bodySize)
-	pdf.MultiCell(0, 5, tr("  Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial para que te ayude a entender estas instrucciones y recuperar los datos. Copia este documento completo y pídele a la IA que te explique los pasos. La herramienta recover.html también está disponible en español."), "", "L", true)
+	pdf.SetFont(fontSans, "I", bodySize)
+	pdf.MultiCell(0, 5, "  Si no entiendes inglés, puedes usar ChatGPT u otra inteligencia artificial para que te ayude a entender estas instrucciones y recuperar los datos. Copia este documento completo y pídele a la IA que te explique los pasos. La herramienta recover.html también está disponible en español.", "", "L", true)
 	pdf.Ln(5)
 
 	// Section: What is this?
@@ -89,9 +90,9 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	if !data.Anonymous {
 		addSection(pdf, "OTHER SHARE HOLDERS (contact to coordinate recovery)")
 		for _, friend := range data.OtherFriends {
-			pdf.SetFont("Helvetica", "B", bodySize)
-			pdf.CellFormat(0, 6, friend.Name, "", 1, "L", false, 0, "")
-			pdf.SetFont("Helvetica", "", bodySize)
+		pdf.SetFont(fontSans, "B", bodySize)
+		pdf.CellFormat(0, 6, friend.Name, "", 1, "L", false, 0, "")
+		pdf.SetFont(fontSans, "", bodySize)
 			pdf.CellFormat(0, 5, fmt.Sprintf("    Email: %s", friend.Email), "", 1, "L", false, 0, "")
 			if friend.Phone != "" {
 				pdf.CellFormat(0, 5, fmt.Sprintf("    Phone: %s", friend.Phone), "", 1, "L", false, 0, "")
@@ -105,9 +106,9 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	addSection(pdf, "HOW TO RECOVER (PRIMARY METHOD - Browser)")
 	addBody(pdf, "1. Open recover.html in any modern browser (Chrome, Firefox, Safari, Edge)")
 	pdf.Ln(2)
-	pdf.SetFont("Helvetica", "B", bodySize)
+	pdf.SetFont(fontSans, "B", bodySize)
 	pdf.MultiCell(0, 5, "   YOUR SHARE IS ALREADY LOADED!", "", "L", false)
-	pdf.SetFont("Helvetica", "I", bodySize)
+	pdf.SetFont(fontSans, "I", bodySize)
 	pdf.MultiCell(0, 5, "   The recovery tool is personalized for you.", "", "L", false)
 	pdf.Ln(2)
 	addBody(pdf, "2. Load the encrypted file (MANIFEST.age) from this bundle:")
@@ -135,14 +136,14 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 		addBody(pdf, "6. Download the recovered files")
 	}
 	pdf.Ln(2)
-	pdf.SetFont("Helvetica", "I", bodySize)
+	pdf.SetFont(fontSans, "I", bodySize)
 	pdf.MultiCell(0, 5, "Works completely offline - no internet required!", "", "L", false)
 	pdf.Ln(5)
 
 	// Section: CLI fallback
 	addSection(pdf, "HOW TO RECOVER (FALLBACK - Command Line)")
 	addBody(pdf, "If recover.html doesn't work, download the CLI tool from:")
-	pdf.SetFont("Courier", "", monoSize)
+	pdf.SetFont(fontMono, "", monoSize)
 	pdf.MultiCell(0, 5, data.GitHubReleaseURL, "", "L", false)
 	pdf.Ln(2)
 	addBody(pdf, "Usage: rememory recover share1.txt share2.txt ... --manifest MANIFEST.age")
@@ -150,7 +151,7 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 
 	// Section: Share
 	addSection(pdf, "YOUR SHARE (upload this file or copy-paste this block)")
-	pdf.SetFont("Courier", "", monoSize)
+	pdf.SetFont(fontMono, "", monoSize)
 	pdf.SetFillColor(245, 245, 245)
 
 	// Draw share in a box
@@ -166,9 +167,9 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	pdf.Ln(5)
 
 	// Footer: Metadata
-	pdf.SetFont("Helvetica", "B", monoSize)
+	pdf.SetFont(fontSans, "B", monoSize)
 	pdf.CellFormat(0, 5, "METADATA", "", 1, "L", false, 0, "")
-	pdf.SetFont("Courier", "", monoSize)
+	pdf.SetFont(fontMono, "", monoSize)
 	pdf.SetFillColor(245, 245, 245)
 	addMeta(pdf, "rememory-version", data.Version)
 	addMeta(pdf, "created", data.Created.Format(time.RFC3339))
@@ -189,14 +190,14 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 }
 
 func addSection(pdf *fpdf.Fpdf, title string) {
-	pdf.SetFont("Helvetica", "B", headingSize)
+	pdf.SetFont(fontSans, "B", headingSize)
 	pdf.SetFillColor(230, 230, 230)
 	pdf.CellFormat(0, 8, " "+title, "", 1, "L", true, 0, "")
 	pdf.Ln(2)
 }
 
 func addBody(pdf *fpdf.Fpdf, text string) {
-	pdf.SetFont("Helvetica", "", bodySize)
+	pdf.SetFont(fontSans, "", bodySize)
 	pdf.MultiCell(0, 5, text, "", "L", false)
 }
 
