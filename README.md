@@ -16,31 +16,27 @@ Each friend receives a bundle containing `recover.html`—a self-contained recov
 graph TB
     subgraph seal["① SEAL (you do this once)"]
         A[Your Secrets] --> B[Encrypt with age]
-        B --> C[Split key into 5 shares]
+        B --> C[Split key into 3 shares]
         C --> D1[Alice's bundle]
         C --> D2[Bob's bundle]
         C --> D3[Carol's bundle]
-        C --> D4[David's bundle]
-        C --> D5[Eve's bundle]
     end
 
     subgraph recover["② RECOVER (friends do this together)"]
         R1[Alice opens recover.html] --> R2[Her share is pre-loaded]
         R2 --> R3[Adds Bob's share]
-        R3 --> R4[Adds Carol's share]
-        R4 --> R5{3 of 5 shares}
+        R3 --> R5{2 of 3 shares}
         R5 -->|Threshold met| R6[Auto-decrypts!]
         R6 --> R7[Download files]
     end
 
     D1 -.-> R1
     D2 -.-> R3
-    D3 -.-> R4
 ```
 
-The key insight: **any 3 shares can reconstruct the key, but 2 shares reveal nothing**—not "very little," mathematically zero information.
+The key insight: **any 2 shares can reconstruct the key, but a single share reveals nothing**—not "very little," mathematically zero information.
 
-The threshold is up to you: 3-of-5 for distributing among trusted friends, 2-of-3 for a small circle, or even 2-of-2 for couples with shared private content that neither partner can access alone.
+Both the number of friends and the threshold are fully configurable: 2-of-3 for a small circle, 3-of-5 for a wider group, or even 2-of-2 for couples with shared private content that neither partner can access alone.
 
 ---
 
@@ -78,8 +74,8 @@ Before protecting real secrets, **try the recovery process** to understand how i
 
 1. **[Download demo bundles](https://github.com/eljojo/rememory/releases/download/v0.0.3/demo-bundles.zip)** (contains 3 sample bundles)
 2. Open `bundle-alice/recover.html` in your browser
-3. Alice's share is pre-loaded — add Bob's and Carol's shares
-4. Watch the automatic decryption when threshold is met
+3. Alice's share is pre-loaded — add Bob's share (or Carol's)
+4. Watch the automatic decryption when the threshold is met
 
 This hands-on experience will help you understand what your friends will see during a real recovery.
 
