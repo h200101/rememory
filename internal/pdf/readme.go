@@ -93,9 +93,8 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 			pdf.SetFont(fontSans, "B", bodySize)
 			pdf.CellFormat(0, 6, friend.Name, "", 1, "L", false, 0, "")
 			pdf.SetFont(fontSans, "", bodySize)
-			pdf.CellFormat(0, 5, fmt.Sprintf("    Email: %s", friend.Email), "", 1, "L", false, 0, "")
-			if friend.Phone != "" {
-				pdf.CellFormat(0, 5, fmt.Sprintf("    Phone: %s", friend.Phone), "", 1, "L", false, 0, "")
+			if friend.Contact != "" {
+				pdf.CellFormat(0, 5, fmt.Sprintf("    Contact: %s", friend.Contact), "", 1, "L", false, 0, "")
 			}
 			pdf.Ln(2)
 		}
