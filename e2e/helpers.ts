@@ -260,12 +260,11 @@ export class CreationPage {
     await removeButtons.nth(index).click();
   }
 
-  async setFriend(index: number, name: string, email: string, phone?: string): Promise<void> {
+  async setFriend(index: number, name: string, contact?: string): Promise<void> {
     const entry = this.page.locator('.friend-entry').nth(index);
     await entry.locator('.friend-name').fill(name);
-    await entry.locator('.friend-email').fill(email);
-    if (phone) {
-      await entry.locator('.friend-phone').fill(phone);
+    if (contact) {
+      await entry.locator('.friend-contact').fill(contact);
     }
   }
 
@@ -273,10 +272,12 @@ export class CreationPage {
     await expect(this.page.locator('.friend-entry')).toHaveCount(count);
   }
 
-  async expectFriendData(index: number, name: string, email: string): Promise<void> {
+  async expectFriendData(index: number, name: string, contact?: string): Promise<void> {
     const entry = this.page.locator('.friend-entry').nth(index);
     await expect(entry.locator('.friend-name')).toHaveValue(name);
-    await expect(entry.locator('.friend-email')).toHaveValue(email);
+    if (contact !== undefined) {
+      await expect(entry.locator('.friend-contact')).toHaveValue(contact);
+    }
   }
 
   // Threshold
@@ -422,5 +423,57 @@ export class CreationPage {
 
   async expectNumShares(count: number): Promise<void> {
     await expect(this.page.locator('#num-shares')).toHaveValue(String(count));
+  }
+
+  // Export YAML and return content
+  async exportYAML(): Promise<string> {
+    // Listen for download event and intercept the Blob
+    const yamlContent = await this.page.evaluate(async () => {
+      return new Promise<string>((resolve, reject) => {
+        // Override URL.createObjectURL to capture the blob
+        const originalCreateObjectURL = URL.createObjectURL;
+        let resolved = false;
+        
+        // Set a timeout in case the download never happens (5 seconds)
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            URL.createObjectURL = originalCreateObjectURL;
+            reject(new Error('YAML download timeout'));
+          }
+        }, 5000);
+        
+        URL.createObjectURL = (blob: Blob | MediaSource) => {
+          if (blob instanceof Blob && !resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            const reader = new FileReader();
+            reader.onload = () => {
+              URL.createObjectURL = originalCreateObjectURL;
+              resolve(reader.result as string);
+            };
+            reader.onerror = () => {
+              URL.createObjectURL = originalCreateObjectURL;
+              reject(new Error('Failed to read blob'));
+            };
+            reader.readAsText(blob);
+            return originalCreateObjectURL(blob);
+          }
+          // Handle MediaSource or non-Blob cases
+          return originalCreateObjectURL(blob);
+        };
+        
+        // Click the download button
+        const btn = document.getElementById('download-yaml-btn');
+        if (!btn) {
+          clearTimeout(timeout);
+          URL.createObjectURL = originalCreateObjectURL;
+          reject(new Error('Download button not found'));
+          return;
+        }
+        btn.click();
+      });
+    });
+    
+    return yamlContent;
   }
 }
