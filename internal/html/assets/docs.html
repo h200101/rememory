@@ -310,7 +310,8 @@
         <li class="indent"><a href="#distributing">Distributing to Friends</a></li>
         <li><a href="#recovering">Recovering Files</a></li>
         <li class="indent"><a href="#bundle-contents">What Friends Receive</a></li>
-        <li class="indent"><a href="#recovery-process">Recovery Process</a></li>
+        <li class="indent"><a href="#recovery-bundle">Path A: I Have the Bundle ZIP</a></li>
+        <li class="indent"><a href="#recovery-pdf">Path B: I Have a Printed PDF</a></li>
         <li><a href="#best-practices">Best Practices</a></li>
         <li><a href="#cli">CLI Alternative</a></li>
         <li><a href="#anonymous">Advanced: Anonymous Mode</a></li>
@@ -426,6 +427,7 @@
           <li>Keep the bundle somewhere safe (cloud backup, USB drive, etc.)</li>
           <li>They cannot use it alone—they'll need to coordinate with others</li>
           <li>A single share reveals nothing, but they should still keep it private</li>
+          <li>Consider printing the <code>README.pdf</code> and keeping it in a safe—paper survives digital disasters. The <code>MANIFEST.age</code> file can be stored separately (cloud, email, USB) since it's just encrypted ciphertext.</li>
         </ol>
       </div>
     </section>
@@ -443,7 +445,8 @@
         </div>
         <div class="file">
           <span class="file-name">README.pdf</span>
-          <span class="file-desc">Same content, formatted for printing</span>
+          <span class="file-desc">Same content, formatted for printing. Also includes a <strong>QR code</strong>
+        that can be scanned to import the share directly.</span>
         </div>
         <div class="file">
           <span class="file-name">MANIFEST.age</span>
@@ -460,16 +463,17 @@
         and shows a contact list of other friends who hold shares.
       </p>
 
-      <h3 id="recovery-process">Recovery Process</h3>
+      <h3 id="recovery-bundle">Path A: I Have the Bundle ZIP</h3>
       <p>
-        When your friends need to recover your secrets, here's what they do:
+        This is the easiest path. If you have the bundle ZIP file (or the individual files from it),
+        here's what to do:
       </p>
 
       <div class="step-guide">
         <div class="step-number">1</div>
         <div class="step-content">
-          <h4>Open recover.html</h4>
-          <p>One friend opens the recovery tool from their bundle in any modern browser. Their share is automatically pre-loaded.</p>
+          <h4>Extract the ZIP and open recover.html</h4>
+          <p>Open the recovery tool in any modern browser. Your share is automatically pre-loaded.</p>
         </div>
       </div>
 
@@ -485,7 +489,7 @@
         <div class="step-number">3</div>
         <div class="step-content">
           <h4>Coordinate with other friends</h4>
-          <p>The tool shows a contact list with other friends' names and contact information. Reach out and ask them to send their <code>README.txt</code> file.</p>
+          <p>The tool shows a contact list with other friends' names and contact information. Reach out and ask them to send their <code>README.txt</code> file or share text.</p>
         </div>
       </div>
 
@@ -493,7 +497,7 @@
         <div class="step-number">4</div>
         <div class="step-content">
           <h4>Add shares from other friends</h4>
-          <p>Drag and drop their <code>README.txt</code> files onto the page, or paste share text directly. A checkmark appears next to each friend's name as their share is added.</p>
+          <p>For each friend's share, you can: drag and drop their <code>README.txt</code> file, paste share text directly, or scan a QR code from their printed PDF. A checkmark appears next to each friend's name as their share is added.</p>
         </div>
       </div>
 
@@ -505,6 +509,11 @@
         </div>
       </div>
 
+      <div class="tip">
+        <strong>Pro tip:</strong> If a friend sends you their entire <code>.zip</code> bundle file,
+        you can drag it directly onto the page—the manifest and their share are both imported automatically.
+      </div>
+
       <figure class="screenshot">
         <img src="screenshots/recovery-1.png" alt="Recovery interface - collecting shares" onerror="this.parentElement.innerHTML='<div class=\'screenshot-placeholder\'><div class=\'icon\'>📸</div>Screenshot: Recovery process</div>'">
         <figcaption>The recovery tool showing collected shares and contact list</figcaption>
@@ -514,6 +523,62 @@
         <img src="screenshots/recovery-2.png" alt="Recovery interface - decryption complete" onerror="this.parentElement.innerHTML='<div class=\'screenshot-placeholder\'><div class=\'icon\'>📸</div>Screenshot: Recovery complete</div>'">
         <figcaption>Once threshold is met, files are decrypted and ready to download</figcaption>
       </figure>
+
+      <h3 id="recovery-pdf">Path B: I Have a Printed PDF</h3>
+      <p>
+        Some people prefer to keep just the PDF printout in a safe or filing cabinet and store the
+        <code>MANIFEST.age</code> file separately (e.g. cloud storage, email, USB drive). Since
+        the manifest is encrypted, it's safe to keep copies anywhere—nobody can open it without
+        combining enough shares.
+      </p>
+      <p>If you're starting from a printed PDF:</p>
+
+      <div class="step-guide">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Open the recovery tool</h4>
+          <p>Scan the QR code on the PDF with your phone camera—it opens the recovery website with your share pre-filled. Alternatively, visit the URL printed on the PDF and type the short code (<code>RM1:...</code>) shown below the QR code into the paste area.</p>
+        </div>
+      </div>
+
+      <figure class="screenshot">
+        <img src="screenshots/qr-camera-permission.png" alt="Browser asking for camera permission" onerror="this.parentElement.innerHTML='<div class=\'screenshot-placeholder\'><div class=\'icon\'>📸</div>Screenshot: Browser asking for webcam permission</div>'">
+        <figcaption>Your browser will ask for permission to use the camera</figcaption>
+      </figure>
+
+      <figure class="screenshot">
+        <img src="screenshots/qr-scanning.png" alt="Scanning a QR code from a printed PDF" onerror="this.parentElement.innerHTML='<div class=\'screenshot-placeholder\'><div class=\'icon\'>📸</div>Screenshot: Scanning QR code from printed PDF</div>'">
+        <figcaption>Point your camera at the QR code on the printed PDF to import the share</figcaption>
+      </figure>
+
+      <div class="step-guide">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Load the encrypted manifest</h4>
+          <p>You need the <code>MANIFEST.age</code> file—drag it onto the page or click to browse. If you don't have it, ask one of the other friends to send it from their bundle. Every bundle contains the same copy.</p>
+        </div>
+      </div>
+
+      <figure class="screenshot">
+        <img src="screenshots/manifest-file-picker.png" alt="Selecting MANIFEST.age from a folder" onerror="this.parentElement.innerHTML='<div class=\'screenshot-placeholder\'><div class=\'icon\'>📸</div>Screenshot: Selecting MANIFEST.age from a folder</div>'">
+        <figcaption>Select the MANIFEST.age file from where you stored it</figcaption>
+      </figure>
+
+      <div class="step-guide">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Collect shares from other friends</h4>
+          <p>Contact other friends and ask them to send their shares. They can send their <code>README.txt</code>, share text, or you can scan the QR code from their printed PDF.</p>
+        </div>
+      </div>
+
+      <div class="step-guide">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h4>Recovery happens automatically</h4>
+          <p>Once the threshold is met, decryption starts immediately.</p>
+        </div>
+      </div>
 
       <div class="tip">
         <strong>Key points about recovery:</strong>
@@ -565,7 +630,7 @@
       </p>
 
       <p>
-        <a href="{{GITHUB_URL}}" class="btn btn-secondary">Download CLI from GitHub</a>
+        <a href="https://github.com/eljojo/rememory/blob/main/docs/guide.md" class="btn btn-secondary">Read the CLI Guide</a>
       </p>
 
       <p style="margin-top: 1rem;">
