@@ -35,6 +35,7 @@ Run this command inside a project directory (created with 'rememory init').`,
 }
 
 func init() {
+	sealCmd.Flags().String("recovery-url", core.DefaultRecoveryURL, "Base URL for QR code in PDF")
 	rootCmd.AddCommand(sealCmd)
 }
 
@@ -59,7 +60,9 @@ func runSeal(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid project: %w", err)
 	}
 
-	if err := sealProject(p); err != nil {
+	recoveryURL, _ := cmd.Flags().GetString("recovery-url")
+
+	if err := sealProject(p, recoveryURL); err != nil {
 		return err
 	}
 
@@ -71,7 +74,8 @@ func runSeal(cmd *cobra.Command, args []string) error {
 
 // sealProject archives, encrypts, splits, verifies, saves, and generates bundles
 // for an already-loaded project. Both runSeal and runDemo share this logic.
-func sealProject(p *project.Project) error {
+// recoveryURL is the base URL for QR codes in the PDF. If empty, the PDF defaults to the production URL.
+func sealProject(p *project.Project, recoveryURL string) error {
 	// Check manifest directory exists and has content
 	manifestDir := p.ManifestPath()
 	fileCount, err := manifest.CountFiles(manifestDir)
@@ -217,6 +221,7 @@ func sealProject(p *project.Project) error {
 		Version:          version,
 		GitHubReleaseURL: fmt.Sprintf("https://github.com/eljojo/rememory/releases/tag/%s", version),
 		WASMBytes:        wasmBytes,
+		RecoveryURL:      recoveryURL,
 	}
 
 	if err := bundle.GenerateAll(p, cfg); err != nil {

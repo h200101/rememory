@@ -136,7 +136,8 @@ export class RecoveryPage {
   }
 
   async expectShareHolder(name: string): Promise<void> {
-    await expect(this.page.locator('.share-item').filter({ hasText: name })).toBeVisible();
+    // Use toBeAttached() since shares may be hidden when threshold is met
+    await expect(this.page.locator('.share-item').filter({ hasText: name })).toBeAttached();
   }
 
   async expectReadyToRecover(): Promise<void> {
@@ -144,7 +145,8 @@ export class RecoveryPage {
   }
 
   async expectNeedMoreShares(count: number): Promise<void> {
-    await expect(this.page.locator('#threshold-info')).toContainText(`Waiting for ${count} more piece`);
+    const expected = count === 1 ? 'Waiting for the last piece' : `Waiting for ${count} more pieces`;
+    await expect(this.page.locator('#threshold-info')).toContainText(expected);
   }
 
   async expectManifestLoaded(): Promise<void> {

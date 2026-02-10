@@ -224,18 +224,15 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 		var otherFriendsInfo []html.FriendInfo
 		if !config.Anonymous {
 			otherFriends = make([]project.Friend, 0, n-1)
+			otherFriendsInfo = make([]html.FriendInfo, 0, n-1)
 			for j, f := range projectFriends {
 				if j != i {
 					otherFriends = append(otherFriends, f)
-				}
-			}
-
-			// Convert to FriendInfo for HTML personalization
-			otherFriendsInfo = make([]html.FriendInfo, len(otherFriends))
-			for j, f := range otherFriends {
-				otherFriendsInfo[j] = html.FriendInfo{
-					Name:    f.Name,
-					Contact: f.Contact,
+					otherFriendsInfo = append(otherFriendsInfo, html.FriendInfo{
+						Name:       f.Name,
+						Contact:    f.Contact,
+						ShareIndex: j + 1, // 1-based share index
+					})
 				}
 			}
 		}
@@ -269,6 +266,7 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 		readmeContent := bundle.GenerateReadme(readmeData)
 
 		// Generate README.pdf
+		// Web-created bundles always use the GitHub Pages recovery URL
 		pdfData := pdf.ReadmeData{
 			ProjectName:      config.ProjectName,
 			Holder:           friend.Name,
