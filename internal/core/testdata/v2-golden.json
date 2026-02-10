@@ -8,42 +8,47 @@
     {
       "index": 1,
       "holder": "Alice",
-      "data_hex": "905e0a74b3affca8bb1923da4bd0e26771b1c493d9294fe270276bb2f6fbfb15db",
-      "checksum": "sha256:b94ca626f5a0ebb59c08e623d5d71819cab3650957db9325de4d525908e94a14",
-      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 1\nTotal: 5\nThreshold: 3\nHolder: Alice\nCreated: 2025-01-01 00:00\nChecksum: sha256:b94ca626f5a0ebb59c08e623d5d71819cab3650957db9325de4d525908e94a14\n\nkF4KdLOv/Ki7GSPaS9DiZ3GxxJPZKU/icCdrsvb7+xXb\n-----END REMEMORY SHARE-----\n",
-      "compact": "RM2:1:5:3:kF4KdLOv_Ki7GSPaS9DiZ3GxxJPZKU_icCdrsvb7-xXb:b94c"
+      "data_hex": "9c84a60e8cd27a1fdadca9817c110a228dd75e6e8f404fb487fc843cda760cf27b",
+      "checksum": "sha256:6158a55c364f91bc663b939c84b48fa1370cf3859b5cf8073fff8cb6a458fe39",
+      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 1\nTotal: 5\nThreshold: 3\nHolder: Alice\nCreated: 2025-01-01 00:00\nChecksum: sha256:6158a55c364f91bc663b939c84b48fa1370cf3859b5cf8073fff8cb6a458fe39\n\nnISmDozSeh/a3KmBfBEKIo3XXm6PQE+0h/yEPNp2DPJ7\n-----END REMEMORY SHARE-----\n",
+      "compact": "RM2:1:5:3:nISmDozSeh_a3KmBfBEKIo3XXm6PQE-0h_yEPNp2DPJ7:6158",
+      "words": "orient cement lonely boost chicken avocado hidden news lift they dream eagle talent quality riot trend exile picnic you anchor soap deposit critic exhaust ability"
     },
     {
       "index": 2,
       "holder": "Bob",
-      "data_hex": "b19c9e0e4639bd094fe8c60c9a5508f5111e50c97f293065ad1f975755727d8f65",
-      "checksum": "sha256:f22b15c3b3837ae7a77cd98288755d37464f67d5212c016ab63a4cae926fef1b",
-      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 2\nTotal: 5\nThreshold: 3\nHolder: Bob\nCreated: 2025-01-01 00:00\nChecksum: sha256:f22b15c3b3837ae7a77cd98288755d37464f67d5212c016ab63a4cae926fef1b\n\nsZyeDkY5vQlP6MYMmlUI9REeUMl/KTBlrR+XV1VyfY9l\n-----END REMEMORY SHARE-----\n",
-      "compact": "RM2:2:5:3:sZyeDkY5vQlP6MYMmlUI9REeUMl_KTBlrR-XV1VyfY9l:f22b"
+      "data_hex": "beba7a2dd690c9ba8631e540f1582958548c952dcf3e22ecbd96bc9690b412db81",
+      "checksum": "sha256:eff40b0e5024c705c2e7b5ecea216fcb8586519326d6674eaeb826127c4cb2c1",
+      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 2\nTotal: 5\nThreshold: 3\nHolder: Bob\nCreated: 2025-01-01 00:00\nChecksum: sha256:eff40b0e5024c705c2e7b5ecea216fcb8586519326d6674eaeb826127c4cb2c1\n\nvrp6LdaQybqGMeVA8VgpWFSMlS3PPiLsvZa8lpC0EtuB\n-----END REMEMORY SHARE-----\n",
+      "compact": "RM2:2:5:3:vrp6LdaQybqGMeVA8VgpWFSMlS3PPiLsvZa8lpC0EtuB:eff4",
+      "words": "salt stable merge pudding arrive tail boat device domain member apart radar emotion enhance rescue treat carry grass grant junior harbor foam enter ice able"
     },
     {
       "index": 3,
       "holder": "Carol",
-      "data_hex": "020e0c02d486b6f6e1191a9e971c98f5753674f3fb07269dae1dab24be6732f476",
-      "checksum": "sha256:5d97ad7e3abfd4fa91183e9da756c6fedb2b1329e6c7b385e4b7d1b56a8ecce5",
-      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 3\nTotal: 5\nThreshold: 3\nHolder: Carol\nCreated: 2025-01-01 00:00\nChecksum: sha256:5d97ad7e3abfd4fa91183e9da756c6fedb2b1329e6c7b385e4b7d1b56a8ecce5\n\nAg4MAtSGtvbhGRqelxyY9XU2dPP7Byadrh2rJL5nMvR2\n-----END REMEMORY SHARE-----\n",
-      "compact": "RM2:3:5:3:Ag4MAtSGtvbhGRqelxyY9XU2dPP7Byadrh2rJL5nMvR2:5d97"
+      "data_hex": "1fe61ebb517fee02ac521c88b6a29243980926c34b302541d17573c0f296bbdbe7",
+      "checksum": "sha256:81b7826a18a351dcdf4b7f3b800bd744cf77e94def28b39bc439790ca3460b26",
+      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 3\nTotal: 5\nThreshold: 3\nHolder: Carol\nCreated: 2025-01-01 00:00\nChecksum: sha256:81b7826a18a351dcdf4b7f3b800bd744cf77e94def28b39bc439790ca3460b26\n\nH+Yeu1F/7gKsUhyItqKSQ5gJJsNLMCVB0XVzwPKWu9vn\n-----END REMEMORY SHARE-----\n",
+      "compact": "RM2:3:5:3:H-Yeu1F_7gKsUhyItqKSQ5gJJsNLMCVB0XVzwPKWu9vn:81b7",
+      "words": "cable couch put pepper year access rally drum master relax pig mango letter nature artwork gravity census attend front travel august ensure urge language about"
     },
     {
       "index": 4,
       "holder": "David",
-      "data_hex": "a2474c9d2817c2db9e009129e02fc743632a6e017d6fdab49b943c201e2767248b",
-      "checksum": "sha256:1b11c0065b3d56168f4333bcb1594dbb4e70357b8cabeebed5b91d1fd9fb64c6",
-      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 4\nTotal: 5\nThreshold: 3\nHolder: David\nCreated: 2025-01-01 00:00\nChecksum: sha256:1b11c0065b3d56168f4333bcb1594dbb4e70357b8cabeebed5b91d1fd9fb64c6\n\nokdMnSgXwtueAJEp4C/HQ2MqbgF9b9q0m5Q8IB4nZySL\n-----END REMEMORY SHARE-----\n",
-      "compact": "RM2:4:5:3:okdMnSgXwtueAJEp4C_HQ2MqbgF9b9q0m5Q8IB4nZySL:1b11"
+      "data_hex": "2de54eb3c8a1cfd7cc67249b4dd55fc5dbbba0a1436c54dc815b43ceb543127975",
+      "checksum": "sha256:9eebdbfee81997bc884b7517233cf0525548475b8442e9e8a518fbaf7b4a8d7b",
+      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 4\nTotal: 5\nThreshold: 3\nHolder: David\nCreated: 2025-01-01 00:00\nChecksum: sha256:9eebdbfee81997bc884b7517233cf0525548475b8442e9e8a518fbaf7b4a8d7b\n\nLeVOs8ihz9fMZySbTdVfxdu7oKFDbFTcgVtDzrVDEnl1\n-----END REMEMORY SHARE-----\n",
+      "compact": "RM2:4:5:3:LeVOs8ihz9fMZySbTdVfxdu7oKFDbFTcgVtDzrVDEnl1:9eeb",
+      "words": "combine clerk provide mule brother typical cover tonight opera huge fitness merry roof space lunar horn feel tomato fine maple twice pave enemy concert above"
     },
     {
       "index": 5,
       "holder": "Eve",
-      "data_hex": "5c33de015b43db487cafcfdbb5e1a2b4fbe13d227e1dc403577a81940086c7ac27",
-      "checksum": "sha256:242b22ded01926df7dba5f8caed34976793fc8acd26d3a1f08ceff7739f11d43",
-      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 5\nTotal: 5\nThreshold: 3\nHolder: Eve\nCreated: 2025-01-01 00:00\nChecksum: sha256:242b22ded01926df7dba5f8caed34976793fc8acd26d3a1f08ceff7739f11d43\n\nXDPeAVtD20h8r8/bteGitPvhPSJ+HcQDV3qBlACGx6wn\n-----END REMEMORY SHARE-----\n",
-      "compact": "RM2:5:5:3:XDPeAVtD20h8r8_bteGitPvhPSJ-HcQDV3qBlACGx6wn:242b"
+      "data_hex": "797e5da0f0d900eb957ffee1733184c313c1f6e73130ebd43aee72b277d8c1bcc4",
+      "checksum": "sha256:c24cac280fd35605bc0a3effb6e2c957cc1202fd7f2fb7cf34c5ed02b4838176",
+      "pem": "-----BEGIN REMEMORY SHARE-----\nVersion: 2\nIndex: 5\nTotal: 5\nThreshold: 3\nHolder: Eve\nCreated: 2025-01-01 00:00\nChecksum: sha256:c24cac280fd35605bc0a3effb6e2c957cc1202fd7f2fb7cf34c5ed02b4838176\n\neX5doPDZAOuVf/7hczGEwxPB9ucxMOvUOu5ysnfYwbzE\n-----END REMEMORY SHARE-----\n",
+      "compact": "RM2:5:5:3:eX5doPDZAOuVf_7hczGEwxPB9ucxMOvUOu5ysnfYwbzE:c24c",
+      "words": "just very habit ticket mosquito into field zone thumb office gentle mail despair window orphan champion type peace romance tornado cherry unaware alone obtain absent"
     }
   ],
   "manifest": {

@@ -153,6 +153,36 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	pdf.CellFormat(0, 4, compact, "", 1, "C", true, 0, "")
 	pdf.Ln(8)
 
+	// Word grid (25 recovery words in two columns: 24 data words + 1 index word)
+	words := data.Share.Words()
+	if len(words) > 0 {
+		addSection(pdf, "YOUR 25 RECOVERY WORDS")
+		pdf.SetFont(fontMono, "", bodySize)
+
+		half := (len(words) + 1) / 2
+		colWidth := contentWidth / 2
+		startY := pdf.GetY()
+
+		for i := 0; i < half; i++ {
+			y := startY + float64(i)*5.5
+
+			// Left column: words 1-12
+			pdf.SetXY(leftMargin, y)
+			pdf.CellFormat(colWidth, 5, fmt.Sprintf("%2d. %s", i+1, words[i]), "", 0, "L", false, 0, "")
+
+			// Right column: words 13-24
+			if i+half < len(words) {
+				pdf.SetXY(leftMargin+colWidth, y)
+				pdf.CellFormat(colWidth, 5, fmt.Sprintf("%2d. %s", i+half+1, words[i+half]), "", 0, "L", false, 0, "")
+			}
+		}
+
+		pdf.SetY(startY + float64(half)*5.5 + 2)
+		pdf.SetFont(fontSans, "I", bodySize)
+		pdf.MultiCell(0, 5, "Read these words to the person helping you recover, or type them into the recovery tool.", "", "L", false)
+		pdf.Ln(5)
+	}
+
 	// PEM block (machine-readable format)
 	addSection(pdf, "MACHINE-READABLE FORMAT")
 	pdf.SetFont(fontMono, "", smallMono)

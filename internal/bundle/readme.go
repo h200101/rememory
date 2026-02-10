@@ -111,8 +111,29 @@ func GenerateReadme(data ReadmeData) string {
 
 	// Share block
 	sb.WriteString("--------------------------------------------------------------------------------\n")
-	sb.WriteString("YOUR SHARE (upload this file or copy-paste this block)\n")
+	sb.WriteString("YOUR SHARE\n")
 	sb.WriteString("--------------------------------------------------------------------------------\n")
+
+	// Word list (primary human-readable format)
+	words := data.Share.Words()
+	if len(words) > 0 {
+		sb.WriteString("YOUR 25 RECOVERY WORDS:\n\n")
+		half := (len(words) + 1) / 2
+		for i := 0; i < half; i++ {
+			left := fmt.Sprintf("%2d. %-14s", i+1, words[i])
+			if i+half < len(words) {
+				right := fmt.Sprintf("%2d. %s", i+half+1, words[i+half])
+				sb.WriteString(fmt.Sprintf("%s%s\n", left, right))
+			} else {
+				sb.WriteString(left + "\n")
+			}
+		}
+		sb.WriteString("\nRead these words to the person helping you recover, or type them\n")
+		sb.WriteString("into the recovery tool at recover.html.\n\n")
+	}
+
+	// PEM block (machine-readable format)
+	sb.WriteString("MACHINE-READABLE FORMAT (you can also upload this entire file):\n")
 	sb.WriteString(data.Share.Encode())
 	sb.WriteString("\n")
 

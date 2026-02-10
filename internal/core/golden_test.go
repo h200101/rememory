@@ -35,6 +35,7 @@ type goldenShare struct {
 	Checksum string `json:"checksum"`
 	PEM      string `json:"pem"`
 	Compact  string `json:"compact"`
+	Words    string `json:"words,omitempty"` // space-separated BIP39 words (v2 only)
 }
 
 type goldenManifest struct {
@@ -186,6 +187,7 @@ func TestGenerateGoldenFixtures(t *testing.T) {
 			Checksum: share.Checksum,
 			PEM:      share.Encode(),
 			Compact:  share.CompactEncode(),
+			Words:    strings.Join(share.Words(), " "),
 		}
 	}
 
@@ -556,6 +558,52 @@ func TestGoldenDecrypt(t *testing.T) {
 				if string(f.Data) != string(diskContent) {
 					t.Errorf("file %q doesn't match expected-output on disk", f.Name)
 				}
+			}
+		})
+	}
+}
+
+// TestGoldenV2WordEncoding tests word encoding round-trips against golden fixtures.
+// Words are 25 words: 24 data words + 1 index word.
+func TestGoldenV2WordEncoding(t *testing.T) {
+	golden := loadGoldenJSON(t, "v2-golden.json")
+
+	for _, gs := range golden.Shares {
+		t.Run(gs.Holder, func(t *testing.T) {
+			if gs.Words == "" {
+				t.Skip("no words field in fixture (regenerate with -generate)")
+			}
+
+			data := mustDecodeHex(t, gs.DataHex)
+
+			// Build a share to get the full 25-word encoding
+			share := &Share{
+				Version: golden.Version,
+				Index:   gs.Index,
+				Data:    data,
+			}
+			words := share.Words()
+			got := strings.Join(words, " ")
+			if got != gs.Words {
+				t.Errorf("word encoding mismatch:\n  got:  %s\n  want: %s", got, gs.Words)
+			}
+
+			// Verify 25 words (24 data + 1 index)
+			fixtureWords := strings.Split(gs.Words, " ")
+			if len(fixtureWords) != 25 {
+				t.Fatalf("expected 25 words in fixture, got %d", len(fixtureWords))
+			}
+
+			// Decode fixture words and compare to data bytes + index
+			decoded, index, err := DecodeShareWords(fixtureWords)
+			if err != nil {
+				t.Fatalf("DecodeShareWords: %v", err)
+			}
+			if !bytes.Equal(decoded, data) {
+				t.Errorf("word decoding data mismatch:\n  got:  %x\n  want: %s", decoded, gs.DataHex)
+			}
+			if index != gs.Index {
+				t.Errorf("word decoding index: got %d, want %d", index, gs.Index)
 			}
 		})
 	}

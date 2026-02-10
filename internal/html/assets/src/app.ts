@@ -88,7 +88,7 @@ declare const t: TranslationFunction;
     scanQrBtn: document.getElementById('scan-qr-btn') as HTMLButtonElement | null,
     qrScannerModal: document.getElementById('qr-scanner-modal'),
     qrVideo: document.getElementById('qr-video') as HTMLVideoElement | null,
-    qrScannerClose: document.getElementById('qr-scanner-close') as HTMLButtonElement | null
+    qrScannerClose: document.getElementById('qr-scanner-close') as HTMLButtonElement | null,
   };
 
   // Personalization data (embedded in HTML)
@@ -549,14 +549,35 @@ declare const t: TranslationFunction;
       }
       share = result.share;
     } else {
-      showError(
-        t('error_paste_no_share_message'),
-        {
-          title: t('error_paste_no_share_title'),
-          guidance: t('error_paste_no_share_guidance')
+      // Try to extract BIP39 words from the pasted text
+      const extractedWords = extractWordsFromText(content);
+      if (extractedWords.length >= 12) {
+        const wordResult = window.rememoryDecodeWords(extractedWords);
+        if (!wordResult.error && wordResult.index > 0) {
+          // Valid words found — add share directly (25th word provides the index)
+          share = buildShareFromWords(wordResult);
+          if (!share) return; // error already shown
+        } else if (wordResult.error) {
+          // Words were detected but decoding failed — show the specific error
+          toast.error(
+            t('error_invalid_words_title'),
+            wordResult.error,
+            t('error_invalid_words_guidance')
+          );
+          return;
         }
-      );
-      return;
+      }
+
+      if (!share) {
+        showError(
+          t('error_paste_no_share_message'),
+          {
+            title: t('error_paste_no_share_title'),
+            guidance: t('error_paste_no_share_guidance')
+          }
+        );
+        return;
+      }
     }
 
     if (state.shares.some(s => s.index === share.index)) {
@@ -572,6 +593,38 @@ declare const t: TranslationFunction;
     state.shares.push(share);
     updateSharesUI();
     checkRecoverReady();
+  }
+
+  // ============================================
+  // Build Share from Decoded Words
+  // ============================================
+
+  function buildShareFromWords(wordResult: { data: Uint8Array; index: number; checksum: string }): import('./types').ParsedShare | null {
+    const shareIndex = wordResult.index;
+
+    // Get version/total/threshold from first loaded share or personalization
+    let version = 2;
+    let total = 0;
+    let threshold = 0;
+
+    if (state.shares.length > 0) {
+      version = state.shares[0].version;
+      total = state.total;
+      threshold = state.threshold;
+    } else if (personalization) {
+      total = personalization.total;
+      threshold = personalization.threshold;
+    }
+
+    // Construct ParsedShare from decoded data
+    const dataB64 = btoa(String.fromCharCode(...wordResult.data));
+    return {
+      version,
+      index: shareIndex,
+      threshold,
+      total,
+      dataB64
+    };
   }
 
   // ============================================
@@ -1096,6 +1149,35 @@ declare const t: TranslationFunction;
   function clearSensitiveState(): void {
     state.decryptedArchive = undefined;
     state.manifest = null;
+  }
+
+  // ============================================
+  // Word Extraction
+  // ============================================
+
+  // extractWordsFromText extracts BIP39 words from text, handling:
+  //   - Numbered two-column grids: " 1. merit   14. beef" (sorted by number)
+  //   - Plain word lists: "merit often shuffle wedding"
+  function extractWordsFromText(text: string): string[] {
+    // Try to parse numbered format first (e.g. "1. word", "13. word")
+    const numbered: { idx: number; word: string }[] = [];
+    const re = /(\d+)\.\s+([a-zA-Z]+)/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      numbered.push({ idx: parseInt(m[1], 10), word: m[2].toLowerCase() });
+    }
+
+    if (numbered.length >= 12) {
+      // Sort by number to handle two-column grids correctly
+      numbered.sort((a, b) => a.idx - b.idx);
+      return numbered.map(e => e.word);
+    }
+
+    // Fallback: plain word list (no numbers)
+    return text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(w => w.length > 0 && /^[a-z]+$/.test(w));
   }
 
   // ============================================

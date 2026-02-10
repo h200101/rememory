@@ -120,6 +120,17 @@ func extractTarGz(tarGzData []byte) ([]core.ExtractedFile, error) {
 	return core.ExtractTarGz(tarGzData)
 }
 
+// decodeShareWords converts 25 BIP39 words to raw share data bytes and share index.
+// The first 24 words encode the data; the 25th word encodes the share index.
+// Returns the decoded bytes, share index, checksum, and any error.
+func decodeShareWords(words []string) ([]byte, int, string, error) {
+	data, index, err := core.DecodeShareWords(words)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	return data, index, core.HashBytes(data), nil
+}
+
 // BundleContents represents extracted content from a bundle ZIP.
 type BundleContents struct {
 	Share    *ShareInfo // Parsed share from README.txt

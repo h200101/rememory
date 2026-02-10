@@ -181,6 +181,38 @@ func parseCompactShareJS(this js.Value, args []js.Value) any {
 	})
 }
 
+// decodeWordsJS decodes 25 BIP39 words to raw share data bytes and share index.
+// The first 24 words encode the data; the 25th word encodes the share index.
+// Args: words (string array)
+// Returns: { data: Uint8Array, index: number, checksum: string, error: string|null }
+func decodeWordsJS(this js.Value, args []js.Value) any {
+	if len(args) < 1 {
+		return errorResult("missing words argument")
+	}
+
+	wordsArray := args[0]
+	length := wordsArray.Length()
+	words := make([]string, length)
+	for i := 0; i < length; i++ {
+		words[i] = wordsArray.Index(i).String()
+	}
+
+	data, index, checksum, err := decodeShareWords(words)
+	if err != nil {
+		return errorResult(err.Error())
+	}
+
+	jsData := js.Global().Get("Uint8Array").New(len(data))
+	js.CopyBytesToJS(jsData, data)
+
+	return js.ValueOf(map[string]any{
+		"data":     jsData,
+		"index":    index,
+		"checksum": checksum,
+		"error":    nil,
+	})
+}
+
 // shareInfoToJS converts a ShareInfo to a JS-compatible map.
 func shareInfoToJS(s *ShareInfo) map[string]any {
 	return map[string]any{

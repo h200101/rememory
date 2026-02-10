@@ -14,6 +14,7 @@ func main() {
 	js.Global().Set("rememoryExtractTarGz", js.FuncOf(extractTarGzJS))
 	js.Global().Set("rememoryExtractBundle", js.FuncOf(extractBundleJS))
 	js.Global().Set("rememoryParseCompactShare", js.FuncOf(parseCompactShareJS))
+	js.Global().Set("rememoryDecodeWords", js.FuncOf(decodeWordsJS))
 
 	// Register bundle creation functions
 	js.Global().Set("rememoryCreateBundles", js.FuncOf(createBundlesJS))

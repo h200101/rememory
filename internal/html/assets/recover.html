@@ -55,14 +55,14 @@
 
       <div class="paste-section">
         <button id="paste-toggle-btn" class="btn btn-secondary" type="button">
-          <span>📋</span> <span data-i18n="paste_btn">Paste a share</span>
+          <span>📋</span> <span data-i18n="paste_btn">Paste a piece or type recovery words</span>
         </button>
         <button id="scan-qr-btn" class="btn btn-secondary hidden" type="button">
           <span>📷</span> <span data-i18n="scan_btn">Scan QR code</span>
         </button>
         <div id="paste-area" class="paste-area hidden">
-          <textarea id="paste-input" placeholder="Paste share text here..." data-i18n-placeholder="paste_placeholder" rows="6"></textarea>
-          <button id="paste-submit-btn" class="btn btn-primary" type="button" data-i18n="paste_submit">Add Share</button>
+          <textarea id="paste-input" placeholder="Paste share text or type your 25 recovery words here..." data-i18n-placeholder="paste_placeholder" rows="6"></textarea>
+          <button id="paste-submit-btn" class="btn btn-primary" type="button" data-i18n="paste_submit">Add piece</button>
         </div>
       </div>
 
@@ -162,8 +162,8 @@
         duplicate: "That piece is already here (index {0})",
         no_share: "No piece found in {0}",
         invalid_share: "That piece looks invalid in {0}: {1}",
-        paste_btn: "Paste a piece",
-        paste_placeholder: "Paste the piece text here...",
+        paste_btn: "Paste a piece or type recovery words",
+        paste_placeholder: "Paste share text or type your 25 recovery words here...",
         paste_submit: "Add piece",
         paste_no_share: "No piece found in the pasted text",
         your_share: "Your piece",
@@ -176,6 +176,9 @@
         scan_title: "Scan a QR code",
         scan_hint: "Point your camera at a QR code from a friend's PDF",
         scan_camera_error: "Could not access the camera",
+        error_invalid_words_title: "Invalid recovery words",
+        error_invalid_words_message: "The recovery words could not be decoded.",
+        error_invalid_words_guidance: "Check the words for typos. Each word should be from the BIP39 word list printed on the recovery sheet.",
         // Error titles
         error_title: "Something went wrong",
         error_wasm_title: "Recovery tool failed to load",
@@ -204,7 +207,7 @@
         error_wrong_manifest_guidance: "The encrypted archive should be named MANIFEST.age. You can find it inside any of the bundles that were distributed to friends.",
         error_paste_no_share_title: "No piece in pasted text",
         error_paste_no_share_message: "The pasted text doesn't contain a valid recovery piece.",
-        error_paste_no_share_guidance: "Copy the entire content from your friend's README.txt file, including the 'BEGIN REMEMORY SHARE' and 'END REMEMORY SHARE' markers.",
+        error_paste_no_share_guidance: "Copy the entire content from your friend's README.txt file, including the 'BEGIN REMEMORY SHARE' and 'END REMEMORY SHARE' markers. You can also type or paste the 25 recovery words.",
         error_decrypt_title: "Decryption failed",
         error_decrypt_message: "The archive couldn't be decrypted with the provided pieces.",
         error_decrypt_guidance: "This usually means the pieces don't match this archive, or not enough valid pieces were provided. Make sure all pieces are from the same recovery set.",
@@ -254,8 +257,8 @@
         duplicate: "Esa parte ya fue agregada (índice {0})",
         no_share: "No se encontró ninguna parte en {0}",
         invalid_share: "La parte en {0} no es válida: {1}",
-        paste_btn: "Pegar una parte",
-        paste_placeholder: "Pega aquí el texto de la parte...",
+        paste_btn: "Pegar una parte o escribir palabras de recuperación",
+        paste_placeholder: "Pega el texto de la parte o escribe tus 25 palabras de recuperación aquí...",
         paste_submit: "Agregar parte",
         paste_no_share: "No se encontró ninguna parte en el texto pegado",
         your_share: "Tu parte",
@@ -268,6 +271,9 @@
         scan_title: "Escanear un código QR",
         scan_hint: "Apunta tu cámara al código QR del PDF de tu amigo",
         scan_camera_error: "No se pudo acceder a la cámara",
+        error_invalid_words_title: "Palabras de recuperación inválidas",
+        error_invalid_words_message: "No se pudieron decodificar las palabras de recuperación.",
+        error_invalid_words_guidance: "Revisa las palabras por errores de escritura. Cada palabra debe ser de la lista BIP39 impresa en la hoja de recuperación.",
         error_title: "Algo salió mal",
         error_wasm_title: "Error al cargar la herramienta",
         error_wasm_message: "No se pudo cargar el módulo de recuperación en tu navegador.",
@@ -295,7 +301,7 @@
         error_wrong_manifest_guidance: "El archivo encriptado debe llamarse MANIFEST.age. Puedes encontrarlo dentro de cualquiera de los sobres distribuidos a los amigos.",
         error_paste_no_share_title: "No hay parte en el texto",
         error_paste_no_share_message: "El texto pegado no contiene una parte de recuperación válida.",
-        error_paste_no_share_guidance: "Copia todo el contenido del archivo README.txt de tu amigo, incluyendo los marcadores 'BEGIN REMEMORY SHARE' y 'END REMEMORY SHARE'.",
+        error_paste_no_share_guidance: "Copia todo el contenido del archivo README.txt de tu amigo, incluyendo los marcadores 'BEGIN REMEMORY SHARE' y 'END REMEMORY SHARE'. También puedes escribir o pegar las 25 palabras de recuperación.",
         error_decrypt_title: "Error de desencriptación",
         error_decrypt_message: "No se pudo desencriptar el archivo con las partes proporcionadas.",
         error_decrypt_guidance: "Esto generalmente significa que las partes no corresponden a este archivo, o no se proporcionaron suficientes partes válidas. Asegúrate de que todas las partes sean del mismo conjunto.",
@@ -344,8 +350,8 @@
         duplicate: "Dieser Teil ist bereits vorhanden (Index {0})",
         no_share: "Kein Teil in {0} gefunden",
         invalid_share: "Der Teil in {0} ist ungültig: {1}",
-        paste_btn: "Teil einfügen",
-        paste_placeholder: "Teil-Text hier einfügen...",
+        paste_btn: "Teil einfügen oder Wiederherstellungswörter eingeben",
+        paste_placeholder: "Teil-Text einfügen oder 25 Wiederherstellungswörter hier eingeben...",
         paste_submit: "Teil hinzufügen",
         paste_no_share: "Kein Teil im eingefügten Text gefunden",
         your_share: "Dein Teil",
@@ -358,6 +364,9 @@
         scan_title: "QR-Code scannen",
         scan_hint: "Richte deine Kamera auf den QR-Code aus dem PDF deines Freundes",
         scan_camera_error: "Kein Zugriff auf die Kamera",
+        error_invalid_words_title: "Ungültige Wiederherstellungswörter",
+        error_invalid_words_message: "Die Wiederherstellungswörter konnten nicht dekodiert werden.",
+        error_invalid_words_guidance: "Überprüfe die Wörter auf Tippfehler. Jedes Wort sollte aus der BIP39-Wortliste stammen, die auf dem Wiederherstellungsblatt gedruckt ist.",
         error_title: "Etwas ist schiefgelaufen",
         error_wasm_title: "Wiederherstellungstool konnte nicht geladen werden",
         error_wasm_message: "Das Wiederherstellungsmodul konnte in deinem Browser nicht geladen werden.",
@@ -385,7 +394,7 @@
         error_wrong_manifest_guidance: "Das verschlüsselte Archiv sollte MANIFEST.age heißen. Du findest es in jedem der an Freunde verteilten Bundles.",
         error_paste_no_share_title: "Kein Teil im Text",
         error_paste_no_share_message: "Der eingefügte Text enthält keinen gültigen Wiederherstellungsteil.",
-        error_paste_no_share_guidance: "Kopiere den gesamten Inhalt der README.txt-Datei deines Freundes, einschließlich der 'BEGIN REMEMORY SHARE' und 'END REMEMORY SHARE' Markierungen.",
+        error_paste_no_share_guidance: "Kopiere den gesamten Inhalt der README.txt-Datei deines Freundes, einschließlich der 'BEGIN REMEMORY SHARE' und 'END REMEMORY SHARE' Markierungen. Du kannst auch die 25 Wiederherstellungswörter eingeben oder einfügen.",
         error_decrypt_title: "Entschlüsselung fehlgeschlagen",
         error_decrypt_message: "Das Archiv konnte mit den bereitgestellten Teilen nicht entschlüsselt werden.",
         error_decrypt_guidance: "Das bedeutet meist, dass die Teile nicht zu diesem Archiv passen oder nicht genügend gültige Teile bereitgestellt wurden. Stelle sicher, dass alle Teile aus demselben Wiederherstellungsset stammen.",
@@ -434,8 +443,8 @@
         duplicate: "Cette part est déjà présente (index {0})",
         no_share: "Aucune part trouvée dans {0}",
         invalid_share: "La part dans {0} est invalide : {1}",
-        paste_btn: "Coller une part",
-        paste_placeholder: "Collez le texte de la part ici...",
+        paste_btn: "Coller une part ou saisir les mots de récupération",
+        paste_placeholder: "Collez le texte de la part ou saisissez vos 25 mots de récupération ici...",
         paste_submit: "Ajouter la part",
         paste_no_share: "Aucune part trouvée dans le texte collé",
         your_share: "Votre part",
@@ -448,6 +457,9 @@
         scan_title: "Scanner un code QR",
         scan_hint: "Dirigez votre caméra vers le QR code du PDF de votre ami",
         scan_camera_error: "Impossible d'accéder à la caméra",
+        error_invalid_words_title: "Mots de récupération invalides",
+        error_invalid_words_message: "Les mots de récupération n'ont pas pu être décodés.",
+        error_invalid_words_guidance: "Vérifiez les mots pour les fautes de frappe. Chaque mot doit figurer dans la liste BIP39 imprimée sur la feuille de récupération.",
         error_title: "Une erreur s'est produite",
         error_wasm_title: "Échec du chargement de l'outil",
         error_wasm_message: "Le module de récupération n'a pas pu être chargé dans votre navigateur.",
@@ -475,7 +487,7 @@
         error_wrong_manifest_guidance: "L'archive chiffrée doit s'appeler MANIFEST.age. Vous pouvez la trouver dans n'importe quelle enveloppe distribuée aux amis.",
         error_paste_no_share_title: "Aucune part dans le texte",
         error_paste_no_share_message: "Le texte collé ne contient pas de part de récupération valide.",
-        error_paste_no_share_guidance: "Copiez tout le contenu du fichier README.txt de votre ami, y compris les marqueurs 'BEGIN REMEMORY SHARE' et 'END REMEMORY SHARE'.",
+        error_paste_no_share_guidance: "Copiez tout le contenu du fichier README.txt de votre ami, y compris les marqueurs 'BEGIN REMEMORY SHARE' et 'END REMEMORY SHARE'. Vous pouvez aussi saisir ou coller les 25 mots de récupération.",
         error_decrypt_title: "Échec du déchiffrement",
         error_decrypt_message: "L'archive n'a pas pu être déchiffrée avec les parts fournies.",
         error_decrypt_guidance: "Cela signifie généralement que les parts ne correspondent pas à cette archive, ou que le nombre de parts valides fourni est insuffisant. Assurez-vous que toutes les parts proviennent du même ensemble.",
@@ -523,8 +535,8 @@
         duplicate: "Ta sveženj je že tukaj (indeks {0})",
         no_share: "Sveženj ni bil najden v {0}",
         invalid_share: "Ta sveženj je videti neveljaven v {0}: {1}",
-        paste_btn: "Prilepi sveženj",
-        paste_placeholder: "Prilepite besedilo svežnja tukaj ...",
+        paste_btn: "Prilepite sveženj ali vnesite besede za obnovitev",
+        paste_placeholder: "Prilepite besedilo svežnja ali vnesite 25 besed za obnovitev tukaj...",
         paste_submit: "Dodaj sveženj",
         paste_no_share: "V prilepljenem besedilu ni bilo najdenega svežnja",
         your_share: "Vaš sveženj",
@@ -537,6 +549,9 @@
         scan_title: "Skeniraj QR kodo",
         scan_hint: "Usmerite kamero na QR kodo s prijateljevega PDF-ja",
         scan_camera_error: "Ni mogoče dostopati do kamere",
+        error_invalid_words_title: "Neveljavne besede za obnovitev",
+        error_invalid_words_message: "Besed za obnovitev ni bilo mogoče dekodirati.",
+        error_invalid_words_guidance: "Preverite besede za tipkarske napake. Vsaka beseda mora biti s seznama BIP39, natisnjenega na listu za obnovitev.",
         // Error titles
         error_title: "Nekaj je šlo narobe",
         error_wasm_title: "Orodje za obnovitev ni uspelo naložiti",
@@ -565,7 +580,7 @@
         error_wrong_manifest_guidance: "Šifriran arhiv mora biti poimenovan MANIFEST.age. Najdete ga lahko v katerem koli od svežnjev, ki so bili razdeljeni prijateljem.",
         error_paste_no_share_title: "V prilepljenem besedilu ni bilo najdenega svežnja",
         error_paste_no_share_message: "Prilepljeno besedilo ne vsebuje veljavnega svežnja za obnovitev.",
-        error_paste_no_share_guidance: "Kopirajte celotno vsebino iz datoteke README.txt vašega prijatelja, vključno z oznakami 'BEGIN REMEMORY SHARE' in 'END REMEMORY SHARE'.",
+        error_paste_no_share_guidance: "Kopirajte celotno vsebino iz datoteke README.txt vašega prijatelja, vključno z oznakami 'BEGIN REMEMORY SHARE' in 'END REMEMORY SHARE'. Lahko tudi vnesete ali prilepite 25 besed za obnovitev.",
         error_decrypt_title: "Dešifriranje ni uspelo",
         error_decrypt_message: "Arhiva ni bilo mogoče dešifrirati z danimi svežnji.",
         error_decrypt_guidance: "To običajno pomeni, da svežnji ne ustrezajo temu arhivu ali pa da ni bilo zagotovljenih dovolj veljavnih svežnjev. Prepričajte se, da so vsi svežnji iz istega nabora za obnovitev.",

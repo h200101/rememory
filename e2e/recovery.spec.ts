@@ -198,6 +198,82 @@ test.describe('Browser Recovery Tool', () => {
     await recovery.expectNeedMoreShares(1);
   });
 
+  test('recover via typed words in paste area', async ({ page }) => {
+    const [aliceDir, bobDir] = extractBundles(bundlesDir, ['Alice', 'Bob']);
+    const recovery = new RecoveryPage(page, aliceDir);
+
+    await recovery.open();
+
+    // Alice's share is pre-loaded via personalization
+    await recovery.expectShareCount(1);
+
+    // Read Bob's README.txt to extract the share words
+    const bobReadme = fs.readFileSync(path.join(bobDir, 'README.txt'), 'utf8');
+
+    // Extract words from the README.txt "YOUR 25 RECOVERY WORDS:" section
+    const wordsMatch = bobReadme.match(/YOUR 25 RECOVERY WORDS:\n\n([\s\S]*?)\n\nRead these words/);
+    expect(wordsMatch).not.toBeNull();
+
+    // Parse the two-column word grid into ordered word list
+    const wordLines = wordsMatch![1].trim().split('\n');
+    const leftWords: string[] = [];
+    const rightWords: string[] = [];
+    const half = 13; // 25 words: 13 left (1-13), 12 right (14-25)
+    for (const line of wordLines) {
+      // Each line has format: " 1. word          14. word"
+      const matches = line.match(/\d+\.\s+(\S+)/g);
+      if (matches) {
+        for (const m of matches) {
+          const wordMatch = m.match(/(\d+)\.\s+(\S+)/);
+          if (wordMatch) {
+            const idx = parseInt(wordMatch[1], 10);
+            const word = wordMatch[2];
+            if (idx <= half) {
+              leftWords.push(word);
+            } else {
+              rightWords.push(word);
+            }
+          }
+        }
+      }
+    }
+    // Combine: left column (1-13) then right column (14-25)
+    const words = [...leftWords, ...rightWords].join(' ');
+    expect(words.split(' ').length).toBe(25);
+
+    // Type the 25 words into the paste area (includes index as 25th word)
+    await recovery.clickPasteButton();
+    await recovery.expectPasteAreaVisible();
+    await recovery.pasteShare(words);
+    await recovery.submitPaste();
+
+    // Bob's share should now be added (index extracted from 25th word)
+    await recovery.expectShareCount(2);
+  });
+
+  test('paste area accepts numbered word grid directly', async ({ page }) => {
+    const [aliceDir, bobDir] = extractBundles(bundlesDir, ['Alice', 'Bob']);
+    const recovery = new RecoveryPage(page, aliceDir);
+
+    await recovery.open();
+    await recovery.expectShareCount(1);
+
+    // Read Bob's README.txt and extract the word grid section as-is
+    const bobReadme = fs.readFileSync(path.join(bobDir, 'README.txt'), 'utf8');
+    const wordsMatch = bobReadme.match(/YOUR 25 RECOVERY WORDS:\n\n([\s\S]*?)\n\nRead these words/);
+    expect(wordsMatch).not.toBeNull();
+    const wordGrid = wordsMatch![1]; // The numbered two-column grid
+
+    // Paste the word grid into the paste area
+    await recovery.clickPasteButton();
+    await recovery.expectPasteAreaVisible();
+    await recovery.pasteShare(wordGrid);
+    await recovery.submitPaste();
+
+    // Share should be added directly (index from 25th word, no manual input needed)
+    await recovery.expectShareCount(2);
+  });
+
   test('detects duplicate shares', async ({ page }) => {
     const bundleDir = extractBundle(bundlesDir, 'Alice');
     const recovery = new RecoveryPage(page, bundleDir);

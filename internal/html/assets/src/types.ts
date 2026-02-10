@@ -189,6 +189,7 @@ declare global {
     rememoryExtractTarGz(data: Uint8Array): ExtractResult;
     rememoryExtractBundle(zipData: Uint8Array): BundleExtractResult;
     rememoryParseCompactShare(compact: string): ShareParseResult;
+    rememoryDecodeWords(words: string[]): { data: Uint8Array; index: number; checksum: string; error?: string };
 
     // Creation functions (create.wasm)
     rememoryCreateBundles(config: BundleConfig): BundleCreateResult;
