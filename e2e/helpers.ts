@@ -98,6 +98,36 @@ export function extractAnonymousBundles(bundlesDir: string, shareNums: number[])
   return shareNums.map(num => extractAnonymousBundle(bundlesDir, num));
 }
 
+// Extract the 25 recovery words from a README.txt file as a space-separated string
+export function extractWordsFromReadme(readmePath: string): string {
+  const readme = fs.readFileSync(readmePath, 'utf8');
+  const wordsMatch = readme.match(/YOUR 25 RECOVERY WORDS:\n\n([\s\S]*?)\n\nRead these words/);
+  if (!wordsMatch) throw new Error('Could not find recovery words in README.txt');
+
+  const wordLines = wordsMatch[1].trim().split('\n');
+  const leftWords: string[] = [];
+  const rightWords: string[] = [];
+  const half = 13; // 25 words: 13 left (1-13), 12 right (14-25)
+  for (const line of wordLines) {
+    const matches = line.match(/\d+\.\s+(\S+)/g);
+    if (matches) {
+      for (const m of matches) {
+        const wordMatch = m.match(/(\d+)\.\s+(\S+)/);
+        if (wordMatch) {
+          const idx = parseInt(wordMatch[1], 10);
+          const word = wordMatch[2];
+          if (idx <= half) {
+            leftWords.push(word);
+          } else {
+            rightWords.push(word);
+          }
+        }
+      }
+    }
+  }
+  return [...leftWords, ...rightWords].join(' ');
+}
+
 // Page helper class for recovery tool interactions
 export class RecoveryPage {
   constructor(private page: Page, private bundleDir: string) {}
@@ -105,6 +135,15 @@ export class RecoveryPage {
   // Navigate to recover.html and wait for WASM
   async open(): Promise<void> {
     await this.page.goto(`file://${path.join(this.bundleDir, 'recover.html')}`);
+    await this.page.waitForFunction(
+      () => (window as any).rememoryAppReady === true,
+      { timeout: 30000 }
+    );
+  }
+
+  // Navigate to a standalone recover.html file (no personalization)
+  async openFile(htmlPath: string): Promise<void> {
+    await this.page.goto(`file://${htmlPath}`);
     await this.page.waitForFunction(
       () => (window as any).rememoryAppReady === true,
       { timeout: 30000 }

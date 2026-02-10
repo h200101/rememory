@@ -288,7 +288,7 @@ declare const t: TranslationFunction;
 
     if (state.shares.some(s => s.index === share.index)) return;
 
-    if (state.shares.length === 0) {
+    if (state.shares.length === 0 || (state.threshold === 0 && share.threshold > 0)) {
       state.threshold = share.threshold;
       state.total = share.total;
     }
@@ -585,7 +585,7 @@ declare const t: TranslationFunction;
       return;
     }
 
-    if (state.shares.length === 0) {
+    if (state.shares.length === 0 || (state.threshold === 0 && share.threshold > 0)) {
       state.threshold = share.threshold;
       state.total = share.total;
     }
@@ -797,7 +797,7 @@ declare const t: TranslationFunction;
       return;
     }
 
-    if (state.shares.length === 0) {
+    if (state.shares.length === 0 || (state.threshold === 0 && share.threshold > 0)) {
       state.threshold = share.threshold;
       state.total = share.total;
     }
@@ -837,7 +837,7 @@ declare const t: TranslationFunction;
       return;
     }
 
-    if (state.shares.length === 0) {
+    if (state.shares.length === 0 || (state.threshold === 0 && share.threshold > 0)) {
       state.threshold = share.threshold;
       state.total = share.total;
     }
@@ -996,9 +996,10 @@ declare const t: TranslationFunction;
   }
 
   function checkRecoverReady(): void {
-    const ready = state.shares.length >= state.threshold &&
-                  state.threshold > 0 &&
-                  state.manifest !== null;
+    const ready = state.manifest !== null && (
+      (state.threshold > 0 && state.shares.length >= state.threshold) ||
+      (state.threshold === 0 && state.shares.length >= 2)
+    );
 
     if (elements.recoverBtn) {
       elements.recoverBtn.disabled = !ready;

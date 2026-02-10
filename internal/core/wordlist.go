@@ -150,7 +150,11 @@ func word25Decode(val int) (index int, checksum int) {
 // Words returns this share's data encoded as 25 BIP39 words.
 // The first 24 words encode the share data (33 bytes = 264 bits, 11 bits per word).
 // The 25th word packs 4 bits of share index + 7 bits of checksum (see word25 layout above).
+// Returns nil for v1 shares, which use base64-encoded data unsuitable for word encoding.
 func (s *Share) Words() []string {
+	if s.Version < 2 {
+		return nil
+	}
 	words := EncodeWords(s.Data)
 	bip39Idx := word25Encode(s.Index, s.Data)
 	words = append(words, bip39English[bip39Idx])
