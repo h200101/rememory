@@ -21,16 +21,7 @@ func parseShareJS(this js.Value, args []js.Value) any {
 	}
 
 	return js.ValueOf(map[string]any{
-		"share": map[string]any{
-			"version":   share.Version,
-			"index":     share.Index,
-			"total":     share.Total,
-			"threshold": share.Threshold,
-			"holder":    share.Holder,
-			"created":   share.Created,
-			"checksum":  share.Checksum,
-			"dataB64":   share.DataB64,
-		},
+		"share": shareInfoToJS(share),
 		"error": nil,
 	})
 }
@@ -153,16 +144,7 @@ func extractBundleJS(this js.Value, args []js.Value) any {
 	}
 
 	result := map[string]any{
-		"share": map[string]any{
-			"version":   bundle.Share.Version,
-			"index":     bundle.Share.Index,
-			"total":     bundle.Share.Total,
-			"threshold": bundle.Share.Threshold,
-			"holder":    bundle.Share.Holder,
-			"created":   bundle.Share.Created,
-			"checksum":  bundle.Share.Checksum,
-			"dataB64":   bundle.Share.DataB64,
-		},
+		"share": shareInfoToJS(bundle.Share),
 		"error": nil,
 	}
 
@@ -193,18 +175,24 @@ func parseCompactShareJS(this js.Value, args []js.Value) any {
 	}
 
 	return js.ValueOf(map[string]any{
-		"share": map[string]any{
-			"version":   share.Version,
-			"index":     share.Index,
-			"total":     share.Total,
-			"threshold": share.Threshold,
-			"holder":    share.Holder,
-			"created":   share.Created,
-			"checksum":  share.Checksum,
-			"dataB64":   share.DataB64,
-		},
+		"share": shareInfoToJS(share),
 		"error": nil,
 	})
+}
+
+// shareInfoToJS converts a ShareInfo to a JS-compatible map.
+func shareInfoToJS(s *ShareInfo) map[string]any {
+	return map[string]any{
+		"version":   s.Version,
+		"index":     s.Index,
+		"total":     s.Total,
+		"threshold": s.Threshold,
+		"holder":    s.Holder,
+		"created":   s.Created,
+		"checksum":  s.Checksum,
+		"dataB64":   s.DataB64,
+		"compact":   s.Compact,
+	}
 }
 
 func errorResult(msg string) any {

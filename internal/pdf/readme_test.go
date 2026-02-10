@@ -3,6 +3,7 @@ package pdf
 import (
 	"bytes"
 	"image/png"
+	"net/url"
 	"testing"
 	"time"
 
@@ -60,7 +61,7 @@ func TestQRContent(t *testing.T) {
 
 	// Without RecoveryURL set: defaults to production URL
 	content := data.QRContent()
-	expected := core.DefaultRecoveryURL + "#share=" + data.Share.CompactEncode()
+	expected := core.DefaultRecoveryURL + "#share=" + url.QueryEscape(data.Share.CompactEncode())
 	if content != expected {
 		t.Errorf("QRContent without URL: got %q, want %q", content, expected)
 	}
@@ -71,7 +72,7 @@ func TestQRContentWithRecoveryURL(t *testing.T) {
 	data.RecoveryURL = "https://example.com/recover.html"
 
 	content := data.QRContent()
-	expected := "https://example.com/recover.html#share=" + data.Share.CompactEncode()
+	expected := "https://example.com/recover.html#share=" + url.QueryEscape(data.Share.CompactEncode())
 	if content != expected {
 		t.Errorf("QRContent with URL: got %q, want %q", content, expected)
 	}
@@ -120,7 +121,7 @@ func TestQRCodeContentMatchesCompact(t *testing.T) {
 
 	qrContent := data.QRContent()
 	compact := share.CompactEncode()
-	expected := core.DefaultRecoveryURL + "#share=" + compact
+	expected := core.DefaultRecoveryURL + "#share=" + url.QueryEscape(compact)
 
 	if qrContent != expected {
 		t.Errorf("QR content doesn't match expected URL:\n  got:  %q\n  want: %q", qrContent, expected)

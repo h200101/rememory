@@ -260,32 +260,12 @@ declare const t: TranslationFunction;
         state.total = share.total;
         state.shares.push(share);
 
-        // Now that we know the holder's index, assign share indices to contact items
-        assignContactIndices(share.index);
-
         updateSharesUI();
         updateContactList();
       }
     }
 
     checkRecoverReady();
-  }
-
-  // Assign share indices to contact list items so we can match compact shares (which lack holder names)
-  function assignContactIndices(holderIndex: number): void {
-    if (!personalization?.otherFriends || !elements.contactList) return;
-
-    const items = elements.contactList.querySelectorAll('.contact-item');
-    // otherFriends are in project order, skipping the holder.
-    // Share indices are 1-based: project friend[0] = share 1, friend[1] = share 2, etc.
-    let friendIdx = 0;
-    for (let shareIndex = 1; shareIndex <= state.total; shareIndex++) {
-      if (shareIndex === holderIndex) continue;
-      if (friendIdx < items.length) {
-        (items[friendIdx] as HTMLElement).dataset.shareIndex = String(shareIndex);
-        friendIdx++;
-      }
-    }
   }
 
   // ============================================
@@ -332,6 +312,9 @@ declare const t: TranslationFunction;
       const item = document.createElement('div');
       item.className = 'contact-item';
       item.dataset.name = friend.name;
+      if (friend.shareIndex) {
+        item.dataset.shareIndex = String(friend.shareIndex);
+      }
 
       const contactInfo = friend.contact ? escapeHtml(friend.contact) : '';
 

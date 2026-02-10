@@ -58,18 +58,15 @@ func GenerateAll(p *project.Project, cfg Config) error {
 		var otherFriendsInfo []html.FriendInfo
 		if !p.Anonymous {
 			otherFriends = make([]project.Friend, 0, len(p.Friends)-1)
+			otherFriendsInfo = make([]html.FriendInfo, 0, len(p.Friends)-1)
 			for j, f := range p.Friends {
 				if j != i {
 					otherFriends = append(otherFriends, f)
-				}
-			}
-
-			// Convert to FriendInfo for HTML personalization
-			otherFriendsInfo = make([]html.FriendInfo, len(otherFriends))
-			for j, f := range otherFriends {
-				otherFriendsInfo[j] = html.FriendInfo{
-					Name:    f.Name,
-					Contact: f.Contact,
+					otherFriendsInfo = append(otherFriendsInfo, html.FriendInfo{
+						Name:       f.Name,
+						Contact:    f.Contact,
+						ShareIndex: j + 1, // 1-based share index
+					})
 				}
 			}
 		}

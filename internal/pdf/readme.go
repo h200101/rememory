@@ -3,6 +3,7 @@ package pdf
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -50,7 +51,7 @@ func (d ReadmeData) QRContent() string {
 	if recoveryURL == "" {
 		recoveryURL = core.DefaultRecoveryURL
 	}
-	return recoveryURL + "#share=" + compact
+	return recoveryURL + "#share=" + url.QueryEscape(compact)
 }
 
 // GenerateReadme creates the README.pdf content.

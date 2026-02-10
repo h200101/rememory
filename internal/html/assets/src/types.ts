@@ -11,6 +11,7 @@ export interface ParsedShare {
   total: number;
   holder?: string;
   dataB64: string;
+  compact?: string;   // Compact-encoded string (e.g. RM1:2:5:3:BASE64:CHECK)
   isHolder?: boolean;  // True if this is the current user's share
 }
 
@@ -90,6 +91,7 @@ export interface ExtractResult {
 export interface FriendInfo {
   name: string;
   contact?: string;
+  shareIndex: number;  // 1-based share index for this friend
 }
 
 export interface FriendInput {

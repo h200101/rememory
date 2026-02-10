@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -30,28 +29,6 @@ test.describe('QR Scanner', () => {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
   });
-
-  // Extract a compact share string from a bundle's README.txt using the CLI
-  function getCompactShare(bundleDir: string): string {
-    const readmePath = path.join(bundleDir, 'README.txt');
-    const content = fs.readFileSync(readmePath, 'utf8');
-
-    // Parse the PEM share via the CLI to get the compact format
-    // We can use the share content directly - extract the PEM block
-    const pemMatch = content.match(
-      /-----BEGIN REMEMORY SHARE-----([\s\S]*?)-----END REMEMORY SHARE-----/
-    );
-    if (!pemMatch) throw new Error('No PEM share found in README.txt');
-
-    // Use the binary to convert - run rememory doc compact-share with the share file
-    // Actually, let's just extract the share data from the output directory
-    const sharesDir = path.join(projectDir, 'output', 'shares');
-    const shareFiles = fs.readdirSync(sharesDir);
-
-    // We need the compact format. Let's get it via page.evaluate after WASM loads.
-    // For now, return the full PEM content and we'll convert in-browser.
-    return pemMatch[0];
-  }
 
   test('scan button is visible when BarcodeDetector is available', async ({ page }) => {
     const bundleDir = extractBundle(bundlesDir, 'Alice');
@@ -176,17 +153,10 @@ test.describe('QR Scanner', () => {
     const compactShare = await page.evaluate((pem: string) => {
       const result = (window as any).rememoryParseShare(pem);
       if (result.error || !result.share) return '';
-      const share = result.share;
-      const b64url = share.dataB64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      const data = Uint8Array.from(atob(share.dataB64), (c: string) => c.charCodeAt(0));
-      return crypto.subtle.digest('SHA-256', data).then((hash: ArrayBuffer) => {
-        const arr = new Uint8Array(hash);
-        const check = Array.from(arr.slice(0, 2)).map(b => b.toString(16).padStart(2, '0')).join('');
-        return `RM1:${share.index}:${share.total}:${share.threshold}:${b64url}:${check}`;
-      });
+      return result.share.compact;
     }, bobPemShare);
 
-    expect(compactShare).toMatch(/^RM1:\d+:\d+:\d+:[A-Za-z0-9_-]+:[0-9a-f]{4}$/);
+    expect(compactShare).toMatch(/^RM\d+:\d+:\d+:\d+:[A-Za-z0-9_-]+:[0-9a-f]{4}$/);
 
     // Verify the compact share parses correctly
     const parseResult = await page.evaluate((compact: string) => {
@@ -256,18 +226,11 @@ test.describe('QR Scanner', () => {
     const recovery = new RecoveryPage(page, aliceDir);
     await recovery.open();
 
-    // Build compact share from PEM via in-browser conversion
+    // Convert PEM share to compact format via WASM
     const compactShare = await page.evaluate((pem: string) => {
       const result = (window as any).rememoryParseShare(pem);
       if (result.error || !result.share) return '';
-      const share = result.share;
-      const b64url = share.dataB64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      const data = Uint8Array.from(atob(share.dataB64), (c: string) => c.charCodeAt(0));
-      return crypto.subtle.digest('SHA-256', data).then((hash: ArrayBuffer) => {
-        const arr = new Uint8Array(hash);
-        const check = Array.from(arr.slice(0, 2)).map(b => b.toString(16).padStart(2, '0')).join('');
-        return `RM1:${share.index}:${share.total}:${share.threshold}:${b64url}:${check}`;
-      });
+      return result.share.compact;
     }, pemMatch[0]);
 
     await page.evaluate((compact: string) => {
