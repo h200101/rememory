@@ -156,40 +156,69 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	// Word grid (25 recovery words in two columns: 24 data words + 1 index word)
 	words, _ := data.Share.Words()
 	if len(words) > 0 {
+		half := (len(words) + 1) / 2
+		rowHeight := 5.5
+		// Total height: section header (10) + grid rows + caption (12) + spacing
+		gridHeight := 10 + float64(half)*rowHeight + 12
+		_, pageHeight := pdf.GetPageSize()
+		_, _, _, bottomMargin := pdf.GetMargins()
+		usableBottom := pageHeight - bottomMargin
+
+		// If the word grid won't fit on the current page, start a new page
+		if pdf.GetY()+gridHeight > usableBottom {
+			pdf.AddPage()
+		}
+
 		addSection(pdf, fmt.Sprintf("YOUR %d RECOVERY WORDS", len(words)))
 		pdf.SetFont(fontMono, "", bodySize)
 
-		half := (len(words) + 1) / 2
 		colWidth := contentWidth / 2
 		startY := pdf.GetY()
 
 		for i := 0; i < half; i++ {
-			y := startY + float64(i)*5.5
+			y := startY + float64(i)*rowHeight
 
-			// Left column: words 1-12
+			// Left column: words 1-13
 			pdf.SetXY(leftMargin, y)
 			pdf.CellFormat(colWidth, 5, fmt.Sprintf("%2d. %s", i+1, words[i]), "", 0, "L", false, 0, "")
 
-			// Right column: words 13-24
+			// Right column: words 14-25
 			if i+half < len(words) {
 				pdf.SetXY(leftMargin+colWidth, y)
 				pdf.CellFormat(colWidth, 5, fmt.Sprintf("%2d. %s", i+half+1, words[i+half]), "", 0, "L", false, 0, "")
 			}
 		}
 
-		pdf.SetY(startY + float64(half)*5.5 + 2)
+		pdf.SetY(startY + float64(half)*rowHeight + 2)
 		pdf.SetFont(fontSans, "I", bodySize)
 		pdf.MultiCell(0, 5, "Read these words to the person helping you recover, or type them into the recovery tool.", "", "L", false)
 		pdf.Ln(5)
 	}
 
 	// PEM block (machine-readable format)
+	// Ensure PEM block starts on a page with enough room for the header + content
+	shareText := data.Share.Encode()
+	shareLines := strings.Split(shareText, "\n")
+	pemHeight := 10.0 // section header
+	for _, line := range shareLines {
+		if line != "" {
+			pemHeight += 3.5
+		} else {
+			pemHeight += 1.5
+		}
+	}
+	{
+		_, pageHeight := pdf.GetPageSize()
+		_, _, _, bottomMargin := pdf.GetMargins()
+		usableBottom := pageHeight - bottomMargin
+		if pdf.GetY()+pemHeight > usableBottom {
+			pdf.AddPage()
+		}
+	}
 	addSection(pdf, "MACHINE-READABLE FORMAT")
 	pdf.SetFont(fontMono, "", smallMono)
 	pdf.SetFillColor(245, 245, 245)
 
-	shareText := data.Share.Encode()
-	shareLines := strings.Split(shareText, "\n")
 	for _, line := range shareLines {
 		if line != "" {
 			pdf.CellFormat(0, 3.5, line, "", 1, "L", true, 0, "")
