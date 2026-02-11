@@ -26,7 +26,7 @@
           version = "0.1.0";
           src = ./.;
 
-          vendorHash = "sha256-4voapYXaf792sNI/P2Uj7ujs4x2r0vkb1bzLXr5Y14I=";
+          vendorHash = "sha256-5IB15Mf4Stm5+HuAODMIRQqovZQse0160750XbHkmHU=";
           proxyVendor = true; # Download deps during build instead of vendoring
 
           nativeBuildInputs = [ pkgs.esbuild pkgs.gnumake ];

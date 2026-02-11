@@ -58,13 +58,19 @@ Everything runs locally in your browser. Your files never leave your device.
 For automation, scripting, or if you prefer the command line.
 
 ```bash
-# Install
-go install github.com/eljojo/rememory/cmd/rememory@latest
+# macOS (Homebrew)
+brew install eljojo/rememory/rememory
 
-# Or download from GitHub Releases
+# Linux (x86_64)
+curl -Lo rememory https://github.com/eljojo/rememory/releases/latest/download/rememory-linux-amd64
+chmod +x rememory
+sudo mv rememory /usr/local/bin/
+
+# Nix
+nix run github:eljojo/rememory
 ```
 
-See the **[CLI User Guide](docs/guide.md)** for complete documentation.
+See the **[CLI User Guide](docs/guide.md)** for more options and complete documentation.
 
 ---
 

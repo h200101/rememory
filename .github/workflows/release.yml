@@ -59,6 +59,53 @@ jobs:
           cd dist
           sha256sum * > checksums.txt
 
+      - name: Generate Homebrew formula
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION_NUM="${VERSION#v}"
+          SHA_DARWIN_ARM64=$(grep 'rememory-darwin-arm64$' dist/checksums.txt | awk '{print $1}')
+          SHA_DARWIN_AMD64=$(grep 'rememory-darwin-amd64$' dist/checksums.txt | awk '{print $1}')
+          SHA_LINUX_ARM64=$(grep 'rememory-linux-arm64$' dist/checksums.txt | awk '{print $1}')
+          SHA_LINUX_AMD64=$(grep 'rememory-linux-amd64$' dist/checksums.txt | awk '{print $1}')
+          cat > dist/rememory.rb << FORMULA
+          class Rememory < Formula
+            desc "Encrypt secrets and split them among people you trust"
+            homepage "https://github.com/eljojo/rememory"
+            version "${VERSION_NUM}"
+            license "Apache-2.0"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/eljojo/rememory/releases/download/${VERSION}/rememory-darwin-arm64"
+                sha256 "${SHA_DARWIN_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/eljojo/rememory/releases/download/${VERSION}/rememory-darwin-amd64"
+                sha256 "${SHA_DARWIN_AMD64}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/eljojo/rememory/releases/download/${VERSION}/rememory-linux-arm64"
+                sha256 "${SHA_LINUX_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/eljojo/rememory/releases/download/${VERSION}/rememory-linux-amd64"
+                sha256 "${SHA_LINUX_AMD64}"
+              end
+            end
+
+            def install
+              bin.install Dir.glob("rememory-*").first => "rememory"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/rememory --version")
+            end
+          end
+          FORMULA
+
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -74,7 +121,22 @@ jobs:
             dist/checksums.txt \
             dist/maker.html \
             dist/recover.html \
+            dist/rememory.rb \
             --generate-notes \
             --draft
           # Publish the release (now it becomes immutable)
           gh release edit ${{ github.ref_name }} --draft=false
+
+      - name: Update Homebrew tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          git clone https://x-access-token:${TAP_TOKEN}@github.com/eljojo/homebrew-rememory.git /tmp/tap
+          mkdir -p /tmp/tap/Formula
+          cp dist/rememory.rb /tmp/tap/Formula/rememory.rb
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/rememory.rb
+          git commit -m "Update rememory to ${{ github.ref_name }}"
+          git push

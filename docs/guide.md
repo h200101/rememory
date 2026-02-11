@@ -35,24 +35,35 @@ The key innovation is that recovery works **entirely offline in a browser**—no
 
 ## Installation
 
-### From GitHub Releases
-
-Download the latest binary for your platform from [Releases](https://github.com/eljojo/rememory/releases).
-
-### With Go
+### macOS (Homebrew)
 
 ```bash
-go install github.com/eljojo/rememory/cmd/rememory@latest
+brew install eljojo/rememory/rememory
 ```
 
-Optionally, generate man pages:
+### Linux
+
+Download the binary, make it executable, and move it to your path.
+
+**x86_64:**
 
 ```bash
-mkdir -p ~/.local/share/man/man1
-rememory doc ~/.local/share/man/man1
+curl -Lo rememory https://github.com/eljojo/rememory/releases/latest/download/rememory-linux-amd64
+chmod +x rememory
+sudo mv rememory /usr/local/bin/
 ```
 
-### With Nix
+**ARM64:**
+
+```bash
+curl -Lo rememory https://github.com/eljojo/rememory/releases/latest/download/rememory-linux-arm64
+chmod +x rememory
+sudo mv rememory /usr/local/bin/
+```
+
+Binaries for all platforms are available on the [Releases](https://github.com/eljojo/rememory/releases) page.
+
+### Nix
 
 Run directly without installing:
 
@@ -61,7 +72,7 @@ nix run github:eljojo/rememory
 ```
 
 <details>
-<summary>Install</summary>
+<summary>Install permanently</summary>
 
 Add to your flake inputs:
 
@@ -93,6 +104,13 @@ Or in home-manager:
 ```
 
 </details>
+
+### Man pages (optional)
+
+```bash
+mkdir -p ~/.local/share/man/man1
+rememory doc ~/.local/share/man/man1
+```
 
 
 ## Creating Your First Project
