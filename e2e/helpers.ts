@@ -460,7 +460,7 @@ export class CreationPage {
   }
 
   async expectGenerationComplete(): Promise<void> {
-    await expect(this.page.locator('#status-message')).toContainText('successfully', { timeout: 120000 });
+    await expect(this.page.locator('#status-message')).toContainText('ready', { timeout: 120000 });
   }
 
   async expectBundleCount(count: number): Promise<void> {
