@@ -987,6 +987,43 @@ footer a:hover {
   font-size: 0.875rem;
 }
 
+/* Site navigation bar - shared across pages */
+.site-nav {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.site-nav .logo {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #2c3e50;
+  text-decoration: none;
+}
+.site-nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.site-nav .nav-links a {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.site-nav .nav-links a:hover {
+  text-decoration: underline;
+}
+.site-nav .lang-toggle {
+  position: static;
+  margin-left: auto;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .container {
@@ -1004,5 +1041,13 @@ footer a:hover {
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .site-nav {
+    flex-direction: column;
+    text-align: center;
+  }
+  .site-nav .lang-toggle {
+    margin-left: 0;
   }
 }

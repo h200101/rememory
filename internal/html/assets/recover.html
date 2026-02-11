@@ -32,7 +32,17 @@
   </div>
 
   <div class="container">
-    <header>
+    <nav class="site-nav">
+      <a href="index.html" class="logo">🧠 ReMemory</a>
+      <div class="nav-links" id="nav-links-standalone">
+        <a href="index.html">About</a>
+        <a href="maker.html">Create Bundles</a>
+        <a href="docs.html">Guide</a>
+        <a href="https://github.com/eljojo/rememory" target="_blank">GitHub</a>
+      </div>
+      <div class="nav-links hidden" id="nav-links-bundle">
+        <a href="https://eljojo.github.io/rememory/docs" target="_blank">Guide</a>
+      </div>
       <div class="lang-toggle">
         <button data-lang="en" class="active">EN</button>
         <button data-lang="es">ES</button>
@@ -40,6 +50,9 @@
         <button data-lang="fr">FR</button>
         <button data-lang="sl">SL</button>
       </div>
+    </nav>
+
+    <header>
       <h1 data-i18n="title">🧠 ReMemory Recovery</h1>
       <p data-i18n="subtitle">Recover your encrypted files using Shamir's Secret Sharing</p>
     </header>
@@ -179,6 +192,13 @@
       if (window.PERSONALIZATION && window.PERSONALIZATION.language && !localStorage.getItem('rememory-lang')) {
         currentLang = window.PERSONALIZATION.language;
       }
+
+      // Toggle nav links: bundle mode shows only Guide (absolute), standalone shows all (relative)
+      if (window.PERSONALIZATION) {
+        document.getElementById('nav-links-standalone')?.classList.add('hidden');
+        document.getElementById('nav-links-bundle')?.classList.remove('hidden');
+      }
+
       setLanguage(currentLang);
 
       // Add click handlers
