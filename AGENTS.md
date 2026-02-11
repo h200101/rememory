@@ -27,33 +27,38 @@ The design should make them feel safe, guided, not rushed, not judged. Soft, war
 
 ### Voice & Copy
 
-The voice is **quiet presence**. Not emotional, not dry, not friendly. Grounded. The copy should feel like someone took time to choose the words — not like someone wrote correct instructions.
+The voice is **quiet presence**. The copy should feel like it was written by someone who cares — you just shouldn't be able to point at any one sentence and say "that's the caring sentence." The kindness is structural: it's in the clarity, the pacing, the fact that someone thought about what you'd need to hear.
 
-**The core principle:** it should read like instructions for doing something meaningful, without ever saying it's meaningful. Never draw attention to the gravity of the situation. Just be steady.
+**What to avoid is not friendliness — it's *performed* friendliness.** "Don't worry, you got this!" is performing. A sentence that simply tells you what to do next, clearly and without rushing you, is kind. A proverb someone chose because they believe it is kind. "We're here for you!" is not.
+
+**The core principle:** write like someone who took time to choose these words. Not like someone filling in a template, not like someone trying to sound warm. Just a person who cares, writing carefully.
 
 **Cadence:**
 - Sentences that don't rush. Short is fine. But not clipped.
 - Phrasing that doesn't feel mechanical.
 - Words that feel placed, not emitted.
+- Leave room for a human touch — a subtitle that means something, a phrase that only a person would choose. Not every line needs to be minimal.
 
 **Concrete rules:**
-- Say "people you trust" not "trusted friends." Say "pieces" not "shares" in user-facing text.
-- Prefer plain, real language over software language. "Decide how many friends must agree" not "Choose a threshold appropriate for your needs."
-- State facts, don't narrate. "3 more pieces needed" not "Waiting for 3 more pieces." "{0} file(s) recovered." not "All done. {0} file(s) recovered."
+- Say "people you trust" in outward-facing copy, not "trusted friends." But in documents addressed *to* those people (the README in a bundle), they are friends — call them that. Say "pieces" not "shares" in user-facing text.
+- Prefer human words over technical ones. "Unlocking..." not "Decrypting..." "Opening archive..." not "Reading archive..." "Decide how many friends must agree" not "Choose a threshold appropriate for your needs."
+- Address people directly, not passively. "You'll need to combine this with other shares." not "This must be combined with other shares."
+- Minimal doesn't mean stripped. A quiet "Done." before a result count is human. "Everything's ready" is warmer than "Ready" without being verbose. "All bundles are ready." says the bundles are ready for their purpose, not just that a process completed.
 - No exclamation marks. Period.
 - Use em dashes ( — ) not double hyphens (--) or unspaced dashes.
-- Drop filler: "please", "simply", "just", "easily", "basically."
-- Don't start guidance with "Make sure you're..." — just say what to do: "Use the README.txt file from a bundle."
+- Drop filler: "simply", "just", "easily", "basically." (But "please" is fine when it's genuine, not reflexive — asking someone to wait is a good place for it.)
+- Don't start guidance with "Make sure you're..." — say what to do: "Use the README.txt file from a bundle."
 - Contractions are fine where they sound natural ("don't", "can't", "won't"). Don't force them and don't avoid them.
-- Status messages should be minimal. "Loading..." not "Preparing the recovery tool..."
-- Success should be quiet. "All bundles created." not "All bundles created successfully!"
+- Status messages should be concise but human. "Loading..." not "Preparing the recovery tool..." But "Unlocking..." is better than "Decrypting..." — use the word a person would use.
+- Success should be quiet, not silent. "All bundles are ready." not "All bundles created successfully!"
 
 **The vibe:**
-- Not: "Don't worry, you got this"
-- Not: "Follow these steps"
-- But: "Here is what to do."
+- Not: "Don't worry, you got this!" (performed warmth)
+- Not: "Execute the following procedure." (mechanical)
+- Not: "Here is what to do." (correct but cold)
+- But: "Here's what to do." — and then instructions so clear they feel like kindness.
 
-Calm, steady, human. Considered.
+Calm, steady, human. Considered. Kind.
 
 ### Color palette
 

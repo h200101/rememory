@@ -33,7 +33,7 @@
   "encrypting": "Encrypting...",
   "splitting": "Splitting key...",
 
-  "complete": "All bundles created.",
+  "complete": "All bundles are ready.",
   "error": "Error: {0}",
   "validation_min_friends": "At least 2 friends are needed",
   "validation_friend_name": "Friend {0}: name is required",
@@ -45,7 +45,7 @@
   "error_title": "Something went wrong",
   "error_not_ready_title": "Not ready yet",
   "error_not_ready_message": "The bundle creator is still loading.",
-  "error_not_ready_guidance": "Wait a moment, then try again.",
+  "error_not_ready_guidance": "Please wait a moment, then try again.",
   "error_import_title": "Import failed",
   "error_import_guidance": "Check that the YAML is well-formed, properly indented, and that each entry has a name.",
   "error_min_friends_title": "Minimum friends required",

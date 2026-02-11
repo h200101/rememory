@@ -261,7 +261,7 @@ export class RecoveryPage {
   }
 
   async expectNeedMoreShares(count: number): Promise<void> {
-    const expected = count === 1 ? 'One more piece needed' : `${count} more pieces needed`;
+    const expected = count === 1 ? 'One last piece needed' : `${count} more pieces needed`;
     await expect(this.page.locator('#threshold-info')).toContainText(expected);
   }
 

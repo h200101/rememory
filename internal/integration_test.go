@@ -864,7 +864,7 @@ func verifyAnonymousBundle(t *testing.T, bundlePath string, shareNum, total, thr
 	}
 
 	// Should contain anonymous-specific warning text
-	if !strings.Contains(readmeContent, "combined with other shares") {
+	if !strings.Contains(readmeContent, "combine this with other shares") {
 		t.Error("anonymous README should mention combining with other shares")
 	}
 
