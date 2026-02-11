@@ -73,12 +73,11 @@ man: build
 
 # Generate standalone HTML files for static hosting
 html: build
-	@mkdir -p dist/screenshots
 	./$(BINARY) html index > dist/index.html
 	./$(BINARY) html create > dist/maker.html
 	./$(BINARY) html docs > dist/docs.html
 	./$(BINARY) html recover > dist/recover.html
-	@cp docs/screenshots/*.png dist/screenshots/ 2>/dev/null || true
+	@rsync -a --include='*.png' --include='*/' --exclude='*' docs/screenshots/ dist/screenshots/
 	@echo "Generated dist/ site"
 
 # Preview the website locally
@@ -155,8 +154,10 @@ bump-major:
 update-pdf-png: build
 	@rm -rf demo-recovery
 	./$(BINARY) demo
-	@mkdir -p docs/screenshots/demo-pdf
-	@rm -f docs/screenshots/demo-pdf/*.png
+	@mkdir -p docs/screenshots/demo-pdf docs/screenshots/demo-pdf-es
+	@rm -f docs/screenshots/demo-pdf/*.png docs/screenshots/demo-pdf-es/*.png
 	@unzip -o demo-recovery/output/bundles/bundle-alice.zip README.pdf -d demo-recovery/output/bundles/bundle-alice/
+	@unzip -o demo-recovery/output/bundles/bundle-camila.zip LEEME.pdf -d demo-recovery/output/bundles/bundle-camila/
 	pdftoppm -png -r 200 demo-recovery/output/bundles/bundle-alice/README.pdf docs/screenshots/demo-pdf/page
-	@echo "Generated PDF page screenshots in docs/screenshots/demo-pdf/"
+	pdftoppm -png -r 200 demo-recovery/output/bundles/bundle-camila/LEEME.pdf docs/screenshots/demo-pdf-es/page
+	@echo "Generated PDF page screenshots in docs/screenshots/demo-pdf/ (English) and docs/screenshots/demo-pdf-es/ (Spanish)"

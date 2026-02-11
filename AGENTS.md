@@ -12,7 +12,7 @@ ReMemory encrypts files with [age](https://github.com/FiloSottile/age), splits t
 - **Empathy.** The people recovering secrets may be non-technical, stressed, or grieving. Every message, instruction, and UI choice should be clear, patient, and helpful. Lend a hand, don't assume expertise.
 - **Stand the test of time.** Recovery bundles may sit untouched for years or decades before they're needed. Avoid dependencies on external services, ephemeral formats, or assumptions about the future. The bundles must work even if this project disappears.
 - **Universality.** The recovery experience must work across platforms, browsers, and languages.
-- **Grounded and humble tone.** When writing README text, guides, or user-facing copy, stay honest about what this tool is and isn't. Don't oversell or make grand claims.
+- **Considered tone.** When writing user-facing copy, every word should feel placed, not emitted. Stay honest about what this tool is and isn't. Don't oversell or make grand claims. See the **Voice & Copy** section below for detailed guidance.
 - **Shared logic across CLI and WASM.** Cryptographic operations and core logic live in `internal/core/` and are reused by both the CLI and browser paths. Don't duplicate — centralize.
 - **Tests verify safety.** Write a failing test first, then make it pass. This applies everywhere — Go unit tests, integration tests, and Playwright browser tests alike. If you can't demonstrate the test failing without your change, you can't be sure it's actually testing anything. Any change that touches `recover.html` or `maker.html` needs a corresponding Playwright test.
 - **Keep docs current.** When changing behavior, update the relevant docs, README, and this AGENTS.md file in the same change.
@@ -21,10 +21,44 @@ ReMemory encrypts files with [age](https://github.com/FiloSottile/age), splits t
 
 ## Feel
 
-ReMemory should feel like "a friend helping you through a weird, scary moment", NOT "a bank vault yelling at you."
-It needs to inspire calm, trust, warmth, clarity — not authority.
+Remember who is reading this. Someone creating bundles may be confronting their own mortality, planning for the worst, or already dealing with loss. Someone recovering files may have just lost a person they love. They may be scared, overwhelmed, or grieving. They are not "users" in the normal sense. They are people in a hard moment, trying to do something important.
 
-People using this may be stressed, grieving, or scared. The design should make them feel safe, guided, not rushed, not judged — "this was made by a human who cares." Soft, warm, paper-like, non-corporate. Low contrast by design: easy on stressed eyes.
+The design should make them feel safe, guided, not rushed, not judged. Soft, warm, paper-like, non-corporate. Low contrast by design: easy on stressed eyes.
+
+### Voice & Copy
+
+The voice is **quiet presence**. The copy should feel like it was written by someone who cares — you just shouldn't be able to point at any one sentence and say "that's the caring sentence." The kindness is structural: it's in the clarity, the pacing, the fact that someone thought about what you'd need to hear.
+
+**What to avoid is not friendliness — it's *performed* friendliness.** "Don't worry, you got this!" is performing. A sentence that simply tells you what to do next, clearly and without rushing you, is kind. A proverb someone chose because they believe it is kind. "We're here for you!" is not.
+
+**The core principle:** write like someone who took time to choose these words. Not like someone filling in a template, not like someone trying to sound warm. Just a person who cares, writing carefully.
+
+**Cadence:**
+- Sentences that don't rush. Short is fine. But not clipped.
+- Phrasing that doesn't feel mechanical.
+- Words that feel placed, not emitted.
+- Leave room for a human touch — a subtitle that means something, a phrase that only a person would choose. Not every line needs to be minimal.
+
+**Concrete rules:**
+- Say "people you trust" in outward-facing copy, not "trusted friends." But in documents addressed *to* those people (the README in a bundle), they are friends — call them that. Say "pieces" not "shares" in user-facing text.
+- Prefer human words over technical ones. "Unlocking..." not "Decrypting..." "Opening archive..." not "Reading archive..." "Decide how many friends must agree" not "Choose a threshold appropriate for your needs."
+- Address people directly, not passively. "You'll need to combine this with other shares." not "This must be combined with other shares."
+- Minimal doesn't mean stripped. A quiet "Done." before a result count is human. "Everything's ready" is warmer than "Ready" without being verbose. "All bundles are ready." says the bundles are ready for their purpose, not just that a process completed.
+- No exclamation marks. Period.
+- Use em dashes ( — ) not double hyphens (--) or unspaced dashes.
+- Drop filler: "simply", "just", "easily", "basically." (But "please" is fine when it's genuine, not reflexive — asking someone to wait is a good place for it.)
+- Don't start guidance with "Make sure you're..." — say what to do: "Use the README.txt file from a bundle."
+- Contractions are fine where they sound natural ("don't", "can't", "won't"). Don't force them and don't avoid them.
+- Status messages should be concise but human. "Loading..." not "Preparing the recovery tool..." But "Unlocking..." is better than "Decrypting..." — use the word a person would use.
+- Success should be quiet, not silent. "All bundles are ready." not "All bundles created successfully!"
+
+**The vibe:**
+- Not: "Don't worry, you got this!" (performed warmth)
+- Not: "Execute the following procedure." (mechanical)
+- Not: "Here is what to do." (correct but cold)
+- But: "Here's what to do." — and then instructions so clear they feel like kindness.
+
+Calm, steady, human. Considered. Kind.
 
 ### Color palette
 
