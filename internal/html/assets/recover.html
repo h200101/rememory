@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-{{CSP_NONCE}}' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src blob: data:; connect-src blob:; form-action 'none';">
   <title>ReMemory Recovery Tool</title>
   <style>{{STYLES}}</style>
 </head>
@@ -142,7 +143,7 @@
   </footer>
 
   <!-- Translations -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     const translations = {{TRANSLATIONS}};
 
     let currentLang = 'en';
@@ -216,20 +217,20 @@
   </script>
 
   <!-- Go WASM runtime -->
-  <script>{{WASM_EXEC}}</script>
+  <script nonce="{{CSP_NONCE}}">{{WASM_EXEC}}</script>
 
   <!-- Embedded WASM binary (base64) -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     window.WASM_BINARY = "{{WASM_BASE64}}";
   </script>
 
   <!-- Personalization data (embedded for this specific friend) -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     window.PERSONALIZATION = {{PERSONALIZATION_DATA}};
   </script>
 
   <!-- Application logic (must come after WASM_BINARY and PERSONALIZATION) -->
   <!-- App.js handles WASM loading with gzip decompression -->
-  <script>{{APP_JS}}</script>
+  <script nonce="{{CSP_NONCE}}">{{APP_JS}}</script>
 </body>
 </html>

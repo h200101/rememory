@@ -71,6 +71,9 @@ func GenerateRecoverHTML(wasmBytes []byte, version, githubURL string, personaliz
 	}
 	html = strings.Replace(html, "{{PERSONALIZATION_DATA}}", personalizationJSON, 1)
 
+	// Apply CSP nonce to all script tags
+	html = applyCSPNonce(html)
+
 	return html
 }
 
