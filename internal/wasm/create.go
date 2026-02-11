@@ -17,6 +17,7 @@ import (
 	"github.com/eljojo/rememory/internal/html"
 	"github.com/eljojo/rememory/internal/pdf"
 	"github.com/eljojo/rememory/internal/project"
+	"github.com/eljojo/rememory/internal/translations"
 
 	"gopkg.in/yaml.v3"
 )
@@ -29,19 +30,21 @@ type FileEntry struct {
 
 // FriendInput represents friend data from JavaScript.
 type FriendInput struct {
-	Name    string
-	Contact string
+	Name     string
+	Contact  string
+	Language string
 }
 
 // CreateBundlesConfig holds all parameters for bundle creation.
 type CreateBundlesConfig struct {
-	ProjectName string
-	Threshold   int
-	Friends     []FriendInput
-	Files       []FileEntry
-	Version     string
-	GitHubURL   string
-	Anonymous   bool
+	ProjectName     string
+	Threshold       int
+	Friends         []FriendInput
+	Files           []FileEntry
+	Version         string
+	GitHubURL       string
+	Anonymous       bool
+	DefaultLanguage string // Default bundle language for all friends
 }
 
 // BundleOutput represents a generated bundle for JavaScript.
@@ -69,6 +72,9 @@ func createBundlesJS(this js.Value, args []js.Value) any {
 		GitHubURL:   configJS.Get("githubURL").String(),
 		Anonymous:   configJS.Get("anonymous").Bool(),
 	}
+	if defLang := configJS.Get("defaultLanguage"); !defLang.IsUndefined() && !defLang.IsNull() {
+		config.DefaultLanguage = defLang.String()
+	}
 
 	// Parse friends array
 	friendsJS := configJS.Get("friends")
@@ -81,6 +87,9 @@ func createBundlesJS(this js.Value, args []js.Value) any {
 		}
 		if contact := f.Get("contact"); !contact.IsUndefined() && !contact.IsNull() {
 			config.Friends[i].Contact = contact.String()
+		}
+		if lang := f.Get("language"); !lang.IsUndefined() && !lang.IsNull() {
+			config.Friends[i].Language = lang.String()
 		}
 	}
 
@@ -209,14 +218,24 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 	projectFriends := make([]project.Friend, len(config.Friends))
 	for i, f := range config.Friends {
 		projectFriends[i] = project.Friend{
-			Name:    f.Name,
-			Contact: f.Contact,
+			Name:     f.Name,
+			Contact:  f.Contact,
+			Language: f.Language,
 		}
 	}
 
 	// Generate bundle for each friend
 	for i, friend := range config.Friends {
 		share := shares[i]
+
+		// Resolve language: friend override > project default > "en"
+		lang := friend.Language
+		if lang == "" {
+			lang = config.DefaultLanguage
+		}
+		if lang == "" {
+			lang = "en"
+		}
 
 		// Get other friends (excluding this one) - empty for anonymous mode
 		var otherFriends []project.Friend
@@ -243,6 +262,7 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 			OtherFriends: otherFriendsInfo,
 			Threshold:    k,
 			Total:        n,
+			Language:     lang,
 		}
 		recoverHTML := html.GenerateRecoverHTML(wasmBytes, config.Version, config.GitHubURL, personalization)
 		recoverChecksum := core.HashString(recoverHTML)
@@ -261,6 +281,7 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 			RecoverChecksum:  recoverChecksum,
 			Created:          now,
 			Anonymous:        config.Anonymous,
+			Language:         lang,
 		}
 		readmeContent := bundle.GenerateReadme(readmeData)
 
@@ -279,6 +300,7 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 			RecoverChecksum:  recoverChecksum,
 			Created:          now,
 			Anonymous:        config.Anonymous,
+			Language:         lang,
 		}
 		pdfContent, err := pdf.GenerateReadme(pdfData)
 		if err != nil {
@@ -286,9 +308,11 @@ func createBundles(config CreateBundlesConfig) ([]BundleOutput, error) {
 		}
 
 		// Create ZIP bundle
+		readmeFileTxt := translations.ReadmeFilename(lang, ".txt")
+		readmeFilePdf := translations.ReadmeFilename(lang, ".pdf")
 		zipFiles := []bundle.ZipFile{
-			{Name: "README.txt", Content: []byte(readmeContent), ModTime: now},
-			{Name: "README.pdf", Content: pdfContent, ModTime: now},
+			{Name: readmeFileTxt, Content: []byte(readmeContent), ModTime: now},
+			{Name: readmeFilePdf, Content: pdfContent, ModTime: now},
 			{Name: "MANIFEST.age", Content: manifestData, ModTime: now},
 			{Name: "recover.html", Content: []byte(recoverHTML), ModTime: now},
 		}
@@ -421,8 +445,9 @@ func parseProjectYAMLJS(this js.Value, args []js.Value) any {
 	friends := make([]any, len(proj.Friends))
 	for i, f := range proj.Friends {
 		friends[i] = map[string]any{
-			"name":    f.Name,
-			"contact": f.Contact,
+			"name":     f.Name,
+			"contact":  f.Contact,
+			"language": f.Language,
 		}
 	}
 
@@ -430,6 +455,7 @@ func parseProjectYAMLJS(this js.Value, args []js.Value) any {
 		"project": map[string]any{
 			"name":      proj.Name,
 			"threshold": proj.Threshold,
+			"language":  proj.Language,
 			"friends":   friends,
 		},
 		"error": nil,
@@ -440,9 +466,11 @@ func parseProjectYAMLJS(this js.Value, args []js.Value) any {
 type ProjectYAML struct {
 	Name      string `yaml:"name"`
 	Threshold int    `yaml:"threshold"`
+	Language  string `yaml:"language,omitempty"`
 	Friends   []struct {
-		Name    string `yaml:"name"`
-		Contact string `yaml:"contact,omitempty"`
+		Name     string `yaml:"name"`
+		Contact  string `yaml:"contact,omitempty"`
+		Language string `yaml:"language,omitempty"`
 	} `yaml:"friends"`
 }
 

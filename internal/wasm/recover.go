@@ -10,6 +10,7 @@ import (
 	"io"
 
 	"github.com/eljojo/rememory/internal/core"
+	"github.com/eljojo/rememory/internal/translations"
 )
 
 // ShareInfo contains parsed share metadata for JS interop.
@@ -121,15 +122,15 @@ func extractTarGz(tarGzData []byte) ([]core.ExtractedFile, error) {
 }
 
 // decodeShareWords converts 25 BIP39 words to raw share data bytes and share index.
-// The first 24 words encode the data; the 25th word packs 4 bits of index + 7 bits of checksum.
-// Returns the decoded bytes, share index (0 if share >15), checksum, and any error.
-// Returns an error if the embedded checksum doesn't match (wrong word order, typos, etc.).
-func decodeShareWords(words []string) ([]byte, int, string, error) {
-	data, index, err := core.DecodeShareWords(words)
+// Auto-detects the word list language. The first 24 words encode the data;
+// the 25th word packs 4 bits of index + 7 bits of checksum.
+// Returns the decoded bytes, share index (0 if share >15), checksum, detected language, and any error.
+func decodeShareWords(words []string) ([]byte, int, string, string, error) {
+	data, index, lang, err := core.DecodeShareWordsAuto(words)
 	if err != nil {
-		return nil, 0, "", err
+		return nil, 0, "", "", err
 	}
-	return data, index, core.HashBytes(data), nil
+	return data, index, core.HashBytes(data), string(lang), nil
 }
 
 // BundleContents represents extracted content from a bundle ZIP.
@@ -160,16 +161,16 @@ func extractBundle(zipData []byte) (*BundleContents, error) {
 			return nil, fmt.Errorf("reading %s: %w", f.Name, err)
 		}
 
-		switch f.Name {
-		case "README.txt":
+		switch {
+		case translations.IsReadmeFile(f.Name, ".txt"):
 			readmeContent = string(data)
-		case "MANIFEST.age":
+		case f.Name == "MANIFEST.age":
 			manifestData = data
 		}
 	}
 
 	if readmeContent == "" {
-		return nil, fmt.Errorf("README.txt not found in bundle")
+		return nil, fmt.Errorf("README file not found in bundle")
 	}
 
 	// Parse share from README

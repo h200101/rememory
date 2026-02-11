@@ -16,6 +16,7 @@ import (
 	"github.com/eljojo/rememory/internal/crypto"
 	"github.com/eljojo/rememory/internal/manifest"
 	"github.com/eljojo/rememory/internal/project"
+	"github.com/eljojo/rememory/internal/translations"
 )
 
 // TestFullWorkflow tests the complete init -> seal -> recover pipeline
@@ -453,21 +454,12 @@ func verifyBundle(t *testing.T, bundlePath string, friend project.Friend, allFri
 	defer r.Close()
 
 	// Check expected files exist
-	expectedFiles := map[string]bool{
-		"README.txt":   false,
-		"README.pdf":   false,
-		"MANIFEST.age": false,
-		"recover.html": false,
-	}
+	var foundReadmeTxt, foundReadmePdf, foundManifest, foundRecover bool
 
 	var readmeContent string
 	var recoverContent string
 
 	for _, f := range r.File {
-		if _, ok := expectedFiles[f.Name]; ok {
-			expectedFiles[f.Name] = true
-		}
-
 		rc, err := f.Open()
 		if err != nil {
 			t.Fatalf("opening %s: %v", f.Name, err)
@@ -478,18 +470,31 @@ func verifyBundle(t *testing.T, bundlePath string, friend project.Friend, allFri
 			t.Fatalf("reading %s: %v", f.Name, err)
 		}
 
-		switch f.Name {
-		case "README.txt":
+		switch {
+		case translations.IsReadmeFile(f.Name, ".txt"):
+			foundReadmeTxt = true
 			readmeContent = string(data)
-		case "recover.html":
+		case translations.IsReadmeFile(f.Name, ".pdf"):
+			foundReadmePdf = true
+		case f.Name == "MANIFEST.age":
+			foundManifest = true
+		case f.Name == "recover.html":
+			foundRecover = true
 			recoverContent = string(data)
 		}
 	}
 
-	for name, found := range expectedFiles {
-		if !found {
-			t.Errorf("missing file: %s", name)
-		}
+	if !foundReadmeTxt {
+		t.Error("missing README .txt file")
+	}
+	if !foundReadmePdf {
+		t.Error("missing README .pdf file")
+	}
+	if !foundManifest {
+		t.Error("missing file: MANIFEST.age")
+	}
+	if !foundRecover {
+		t.Error("missing file: recover.html")
 	}
 
 	// Verify README.txt contains the share
@@ -677,7 +682,7 @@ func extractShareFromBundle(t *testing.T, bundlePath string) *core.Share {
 	defer r.Close()
 
 	for _, f := range r.File {
-		if f.Name == "README.txt" {
+		if translations.IsReadmeFile(f.Name, ".txt") {
 			rc, _ := f.Open()
 			data := make([]byte, f.UncompressedSize64)
 			rc.Read(data)
@@ -690,7 +695,7 @@ func extractShareFromBundle(t *testing.T, bundlePath string) *core.Share {
 			return share
 		}
 	}
-	t.Fatal("README.txt not found in bundle")
+	t.Fatal("README file not found in bundle")
 	return nil
 }
 
@@ -823,7 +828,7 @@ func verifyAnonymousBundle(t *testing.T, bundlePath string, shareNum, total, thr
 
 	var readmeContent string
 	for _, f := range r.File {
-		if f.Name == "README.txt" {
+		if translations.IsReadmeFile(f.Name, ".txt") {
 			rc, _ := f.Open()
 			data, _ := io.ReadAll(rc)
 			rc.Close()
@@ -833,7 +838,7 @@ func verifyAnonymousBundle(t *testing.T, bundlePath string, shareNum, total, thr
 	}
 
 	if readmeContent == "" {
-		t.Fatal("README.txt not found")
+		t.Fatal("README file not found")
 	}
 
 	// Anonymous READMEs should NOT contain "OTHER SHARE HOLDERS" section

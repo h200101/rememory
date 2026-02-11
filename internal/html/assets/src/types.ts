@@ -99,6 +99,7 @@ export interface FriendInfo {
 export interface FriendInput {
   name: string;
   contact?: string;
+  language?: string;
 }
 
 export interface ProjectConfig {
@@ -122,6 +123,7 @@ export interface PersonalizationData {
   otherFriends: FriendInfo[];
   threshold: number;
   total: number;
+  language?: string;
 }
 
 // ============================================

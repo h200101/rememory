@@ -10,6 +10,7 @@ import {
   extractBundles,
   extractAnonymousBundles,
   extractWordsFromReadme,
+  findReadmeFile,
   generateStandaloneHTML,
   RecoveryPage
 } from './helpers';
@@ -102,7 +103,7 @@ test.describe('Browser Recovery Tool', () => {
     await recovery.expectPasteAreaVisible();
 
     // Read Bob's share and paste it
-    const bobShare = fs.readFileSync(path.join(bobDir, 'README.txt'), 'utf8');
+    const bobShare = fs.readFileSync(findReadmeFile(bobDir), 'utf8');
     await recovery.pasteShare(bobShare);
     await recovery.submitPaste();
 
@@ -211,7 +212,7 @@ test.describe('Browser Recovery Tool', () => {
     await recovery.expectShareCount(1);
 
     // Extract Bob's 25 recovery words from his README.txt
-    const words = extractWordsFromReadme(path.join(bobDir, 'README.txt'));
+    const words = extractWordsFromReadme(findReadmeFile(bobDir));
     expect(words.split(' ').length).toBe(25);
 
     // Type the 25 words into the paste area (includes index as 25th word)
@@ -232,7 +233,7 @@ test.describe('Browser Recovery Tool', () => {
     await recovery.expectShareCount(1);
 
     // Read Bob's README.txt and extract the word grid section as-is
-    const bobReadme = fs.readFileSync(path.join(bobDir, 'README.txt'), 'utf8');
+    const bobReadme = fs.readFileSync(findReadmeFile(bobDir), 'utf8');
     const wordsMatch = bobReadme.match(/YOUR 25 RECOVERY WORDS:\n\n([\s\S]*?)\n\nRead these words/);
     expect(wordsMatch).not.toBeNull();
     const wordGrid = wordsMatch![1]; // The numbered two-column grid
@@ -374,14 +375,14 @@ test.describe('Generic recover.html (no personalization)', () => {
     await recovery.expectShareCount(0);
 
     // Paste Alice's words
-    const aliceWords = extractWordsFromReadme(path.join(aliceDir, 'README.txt'));
+    const aliceWords = extractWordsFromReadme(findReadmeFile(aliceDir));
     await recovery.clickPasteButton();
     await recovery.pasteShare(aliceWords);
     await recovery.submitPaste();
     await recovery.expectShareCount(1);
 
     // Paste Bob's words
-    const bobWords = extractWordsFromReadme(path.join(bobDir, 'README.txt'));
+    const bobWords = extractWordsFromReadme(findReadmeFile(bobDir));
     await recovery.clickPasteButton();
     await recovery.pasteShare(bobWords);
     await recovery.submitPaste();
@@ -408,7 +409,7 @@ test.describe('Generic recover.html (no personalization)', () => {
     await recovery.expectShareCount(0);
 
     // Extract Alice's 25 recovery words from her README.txt
-    const aliceWords = extractWordsFromReadme(path.join(aliceDir, 'README.txt'));
+    const aliceWords = extractWordsFromReadme(findReadmeFile(aliceDir));
     expect(aliceWords.split(' ').length).toBe(25);
 
     // Paste Alice's words as the FIRST share (no threshold/total available)
