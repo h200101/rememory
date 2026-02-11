@@ -20,6 +20,18 @@
 
 ---
 
+### Confidence Labels
+
+Each finding ends with a confidence label indicating the type of evidence behind it:
+
+- **Tool output** — produced by running a specific command. You can reproduce it yourself.
+- **Code pointer** — based on reading the source code. The relevant file and line are cited so you can verify.
+- **Structural observation** — follows from the architecture or design, not a single line of code. Requires understanding the system as a whole.
+
+These are honest about what the AI can and can't verify. Tool output is the strongest claim. Code pointers and structural observations require human judgment to confirm.
+
+---
+
 ## 1. Is This Software Safe to Install and Run?
 
 ### 1.1 Dependency Vulnerability Scanning
