@@ -50,19 +50,9 @@ jobs:
 
       - name: Generate demo bundles
         run: |
-          mkdir -p demo
-          cd demo
-          ../dist/rememory-linux-amd64 init --name "Demo Project" --threshold 2 \
-            --friend "Alice,alice@example.com" \
-            --friend "Bob,bob@example.com" \
-            --friend "Carol,carol@example.com"
-          cd recovery
-          echo "This is a demo secret file." > manifest/demo-secret.txt
-          echo "Another example file with sensitive data." > manifest/passwords.txt
-          ../../dist/rememory-linux-amd64 seal
-          # Create a zip of all demo bundles
-          cd output/bundles
-          zip -r ../../../../dist/demo-bundles.zip *.zip
+          ./dist/rememory-linux-amd64 demo demo
+          cd demo/output/bundles
+          zip -r ../../../dist/demo-bundles.zip *.zip
 
       - name: Create checksums
         run: |
