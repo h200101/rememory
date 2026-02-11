@@ -4,6 +4,8 @@ All notable changes to ReMemory are documented here.
 
 ## Unreleased
 
+## v0.0.11 — 2026-02-11
+
 - **PDF redesign** — The README PDF has a clearer visual hierarchy and now shows the recovery rule ("2 of 3 required") prominently, so friends know at a glance how many people need to come together.
 - **Consistent colour palette** — Standardized colours across the website, recovery tool, and PDF to use the same warm, low-contrast palette throughout.
 - **PDF screenshots in README** — The project README now shows example PDF pages so people can see what friends receive before trying the tool.
