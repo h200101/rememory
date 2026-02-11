@@ -123,6 +123,16 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 		p.Ln(5)
 	}
 
+	// Section: Sharing your share (what to do when someone asks)
+	addSection(p, t("sharing_title"))
+	addBody(p, t("sharing_verify"))
+	p.Ln(2)
+	addBody(p, "  \u2022 "+t("sharing_easiest"))
+	addBody(p, "  \u2022 "+t("sharing_readme_only"))
+	addBody(p, "  \u2022 "+t("sharing_words_phone"))
+	addBody(p, "  \u2022 "+t("sharing_qr_mail"))
+	p.Ln(5)
+
 	// Section: Your Share (QR code + PEM block)
 	// Ensure the section header + QR code + caption + compact string stay together
 	qrBlockHeight := 10.0 + 2.0 + qrSizeMM + 3.0 + 5.0 + 2.0 + 4.0 // header + gap + QR + gap + caption + gap + compact
@@ -232,6 +242,8 @@ func GenerateReadme(data ReadmeData) ([]byte, error) {
 	p.Ln(2)
 	p.SetFont(fontSans, "B", bodySize)
 	p.MultiCell(0, 5, "   "+t("recover_share_loaded"), "", "L", false)
+	p.SetFont(fontSans, "", bodySize)
+	p.MultiCell(0, 5, "   "+t("recover_no_html"), "", "L", false)
 	p.Ln(2)
 	if data.ManifestEmbedded {
 		addBody(p, t("recover_step2_embedded"))
