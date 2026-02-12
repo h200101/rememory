@@ -323,7 +323,8 @@ declare let currentLang: string;
       { code: 'de', label: 'Deutsch' },
       { code: 'fr', label: 'Français' },
       { code: 'sl', label: 'Slovenščina' },
-      { code: 'pt', label: 'Português' }
+      { code: 'pt', label: 'Português' },
+      { code: 'zh-TW', label: '正體中文' }
     ];
     const langOptionsHtml = langOptions.map(o =>
       `<option value="${o.code}"${o.code === effectiveLang ? ' selected' : ''}>${escapeHtml(o.label)}</option>`
@@ -409,7 +410,7 @@ declare let currentLang: string;
       for (let k = 2; k <= n; k++) {
         const option = document.createElement('option');
         option.value = String(k);
-        option.textContent = `${k} of ${n}`;
+        option.textContent = t('threshold_option', k, n);
         elements.thresholdSelect.appendChild(option);
       }
 

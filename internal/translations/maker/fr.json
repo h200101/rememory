@@ -11,6 +11,7 @@
   "num_shares_label": "Nombre de parts :",
   "add_friend": "Ajouter un ami",
   "threshold_label": "Seuil :",
+  "threshold_option": "{0} of {1}",
   "threshold_desc": "doivent se mettre d'accord",
   "name_label": "Nom",
   "contact_label": "Contact (optionnel)",

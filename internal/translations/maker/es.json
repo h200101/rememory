@@ -11,6 +11,7 @@
   "num_shares_label": "Número de partes:",
   "add_friend": "Agregar amigo",
   "threshold_label": "Umbral:",
+  "threshold_option": "{0} of {1}",
   "threshold_desc": "deben estar de acuerdo para recuperar",
   "name_label": "Nombre",
   "contact_label": "Contacto (opcional)",
