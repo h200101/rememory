@@ -1,6 +1,6 @@
 module github.com/eljojo/rememory
 
-go 1.25.3
+go 1.25.7
 
 require (
 	filippo.io/age v1.3.1
