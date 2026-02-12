@@ -29,7 +29,7 @@ jobs:
           BUILD_OUTPUT=$(nix build .#rememory 2>&1 || true)
 
           # Extract the "got:" hash from the error output
-          NEW_HASH=$(echo "$BUILD_OUTPUT" | grep -oP 'got:\s+\K\S+')
+          NEW_HASH=$(echo "$BUILD_OUTPUT" | grep -oP 'got:\s+\K\S+' || true)
 
           if [ -z "$NEW_HASH" ]; then
             echo "No hash mismatch found — build may have succeeded or failed for another reason."

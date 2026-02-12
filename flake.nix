@@ -31,6 +31,11 @@
 
           nativeBuildInputs = [ pkgs.esbuild pkgs.gnumake ];
 
+          # Patch go.mod to match nixpkgs Go version (nixpkgs may lag behind)
+          prePatch = ''
+            sed -i "s/^go .*/go ${pkgs.go.version}/" go.mod
+          '';
+
           # Build TypeScript and WASM using Makefile
           preBuild = ''
             make wasm
