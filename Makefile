@@ -1,4 +1,4 @@
-.PHONY: build test test-e2e test-e2e-headed lint clean install wasm ts build-all bump-patch bump-minor bump-major man html serve demo generate-fixtures full update-pdf-png
+.PHONY: build test test-e2e test-e2e-headed lint clean install wasm ts build-all bump-patch bump-minor bump-major man html serve demo generate-fixtures full update-pdf-png release check-translations
 
 BINARY := rememory
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
@@ -73,6 +73,7 @@ man: build
 
 # Generate standalone HTML files for static hosting
 html: build
+	@mkdir -p dist
 	./$(BINARY) html index > dist/index.html
 	./$(BINARY) html create > dist/maker.html
 	./$(BINARY) html docs > dist/docs.html
@@ -91,6 +92,10 @@ demo: build
 	./$(BINARY) demo
 	open demo-recovery/output/bundles/bundle-alice.zip
 
+# Check that all languages have the same translation keys as English
+check-translations:
+	REMEMORY_CHECK_TRANSLATIONS=1 go test -v -run TestAllLanguagesHaveSameKeys ./internal/translations/
+
 # Regenerate golden test fixtures (one-time, output is committed)
 generate-fixtures:
 	go test -v -run TestGenerateGoldenFixtures ./internal/core/ -args -generate
@@ -104,51 +109,54 @@ build-all: wasm
 	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o dist/rememory-darwin-arm64 ./cmd/rememory
 	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o dist/rememory-windows-amd64.exe ./cmd/rememory
 
+# Stamp the Unreleased section in CHANGELOG.md with the next patch version.
+# Run this before bump-patch to finalize the changelog for the release.
+release:
+	@git fetch --tags; \
+	current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	major=$$(echo $$current | cut -d. -f1 | tr -d v); \
+	minor=$$(echo $$current | cut -d. -f2); \
+	patch=$$(echo $$current | cut -d. -f3); \
+	new="v$$major.$$minor.$$((patch + 1))"; \
+	today=$$(date +%Y-%m-%d); \
+	if ! grep -q '^## Unreleased' CHANGELOG.md; then \
+		echo "No Unreleased section found in CHANGELOG.md"; exit 1; \
+	fi; \
+	perl -i -pe "s/^## Unreleased$$/## Unreleased\n\n## $$new — $$today/" CHANGELOG.md; \
+	git add CHANGELOG.md; \
+	git commit -m "Release $$new"; \
+	echo "Stamped changelog and committed. Now run: make bump-patch"
+
 # Bump version tags (usage: make bump-patch, bump-minor, bump-major)
 bump-patch:
-	@current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	@git fetch --tags; \
+	current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
 	major=$$(echo $$current | cut -d. -f1 | tr -d v); \
 	minor=$$(echo $$current | cut -d. -f2); \
 	patch=$$(echo $$current | cut -d. -f3); \
 	new="v$$major.$$minor.$$((patch + 1))"; \
 	echo "Bumping $$current -> $$new"; \
 	git tag -a $$new -m "Release $$new"; \
-	echo ""; \
-	read -p "Push tag $$new to origin? [y/N] " answer; \
-	if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
-		git push origin $$new; \
-	else \
-		echo "Tag created locally. Push with: git push origin $$new"; \
-	fi
+	git push origin $$new
 
 bump-minor:
-	@current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	@git fetch --tags; \
+	current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
 	major=$$(echo $$current | cut -d. -f1 | tr -d v); \
 	minor=$$(echo $$current | cut -d. -f2); \
 	new="v$$major.$$((minor + 1)).0"; \
 	echo "Bumping $$current -> $$new"; \
 	git tag -a $$new -m "Release $$new"; \
-	echo ""; \
-	read -p "Push tag $$new to origin? [y/N] " answer; \
-	if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
-		git push origin $$new; \
-	else \
-		echo "Tag created locally. Push with: git push origin $$new"; \
-	fi
+	git push origin $$new
 
 bump-major:
-	@current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	@git fetch --tags; \
+	current=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
 	major=$$(echo $$current | cut -d. -f1 | tr -d v); \
 	new="v$$((major + 1)).0.0"; \
 	echo "Bumping $$current -> $$new"; \
 	git tag -a $$new -m "Release $$new"; \
-	echo ""; \
-	read -p "Push tag $$new to origin? [y/N] " answer; \
-	if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
-		git push origin $$new; \
-	else \
-		echo "Tag created locally. Push with: git push origin $$new"; \
-	fi
+	git push origin $$new
 
 # Generate PNG screenshots from demo PDF pages (requires pdftoppm from poppler)
 update-pdf-png: build

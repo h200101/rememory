@@ -26,10 +26,15 @@
           version = "0.1.0";
           src = ./.;
 
-          vendorHash = "sha256-5IB15Mf4Stm5+HuAODMIRQqovZQse0160750XbHkmHU=";
+          vendorHash = "sha256-W6LWBjVG7TFJJfnlTxE7Zc/vS/Nxg7zQWbvo/QEXVGY=";
           proxyVendor = true; # Download deps during build instead of vendoring
 
           nativeBuildInputs = [ pkgs.esbuild pkgs.gnumake ];
+
+          # Patch go.mod to match nixpkgs Go version (nixpkgs may lag behind)
+          prePatch = ''
+            sed -i "s/^go .*/go ${pkgs.go.version}/" go.mod
+          '';
 
           # Build TypeScript and WASM using Makefile
           preBuild = ''

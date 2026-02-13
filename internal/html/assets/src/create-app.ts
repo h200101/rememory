@@ -64,8 +64,9 @@ declare let currentLang: string;
 
   // DOM elements interface
   interface Elements {
-    loadingOverlay: HTMLElement | null;
-    anonymousMode: HTMLInputElement | null;
+    wasmLoadingIndicator: HTMLElement | null;
+    modeTabs: HTMLElement | null;
+    customLanguageToggle: HTMLElement | null;
     customLanguageMode: HTMLInputElement | null;
     friendsHint: HTMLElement | null;
     sharesInput: HTMLElement | null;
@@ -77,6 +78,8 @@ declare let currentLang: string;
     friendsList: HTMLElement | null;
     addFriendBtn: HTMLButtonElement | null;
     thresholdSelect: HTMLSelectElement | null;
+    thresholdSection: HTMLElement | null;
+    thresholdGuidance: HTMLElement | null;
     friendsValidation: HTMLElement | null;
     filesDropZone: HTMLElement | null;
     filesInput: HTMLInputElement | null;
@@ -94,8 +97,9 @@ declare let currentLang: string;
 
   // DOM elements
   const elements: Elements = {
-    loadingOverlay: document.getElementById('loading-overlay'),
-    anonymousMode: document.getElementById('anonymous-mode') as HTMLInputElement | null,
+    wasmLoadingIndicator: document.getElementById('wasm-loading-indicator'),
+    modeTabs: document.getElementById('mode-tabs'),
+    customLanguageToggle: document.getElementById('custom-language-toggle'),
     customLanguageMode: document.getElementById('custom-language-mode') as HTMLInputElement | null,
     friendsHint: document.getElementById('friends-hint'),
     sharesInput: document.getElementById('shares-input'),
@@ -107,6 +111,8 @@ declare let currentLang: string;
     friendsList: document.getElementById('friends-list'),
     addFriendBtn: document.getElementById('add-friend-btn') as HTMLButtonElement | null,
     thresholdSelect: document.getElementById('threshold-select') as HTMLSelectElement | null,
+    thresholdSection: document.getElementById('threshold-section'),
+    thresholdGuidance: document.getElementById('threshold-guidance'),
     friendsValidation: document.getElementById('friends-validation'),
     filesDropZone: document.getElementById('files-drop-zone'),
     filesInput: document.getElementById('files-input') as HTMLInputElement | null,
@@ -156,8 +162,18 @@ declare let currentLang: string;
   // ============================================
 
   function setupAnonymousMode(): void {
-    elements.anonymousMode?.addEventListener('change', () => {
-      state.anonymous = elements.anonymousMode?.checked || false;
+    // Tab switching between Named and Anonymous
+    elements.modeTabs?.addEventListener('click', (e) => {
+      const tab = (e.target as HTMLElement).closest('.mode-tab') as HTMLElement | null;
+      if (!tab) return;
+      const mode = tab.dataset.mode;
+      if (!mode) return;
+
+      // Update active tab
+      elements.modeTabs?.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      state.anonymous = mode === 'anonymous';
       updateAnonymousModeUI();
       updateThresholdOptions();
       checkGenerateReady();
@@ -180,13 +196,11 @@ declare let currentLang: string;
       if (elements.friendsHint) {
         elements.friendsHint.textContent = t('anonymous_hint');
       }
-      // Disable custom language (no per-friend languages in anonymous mode)
+      // Hide custom language toggle (not relevant for anonymous)
+      elements.customLanguageToggle?.classList.add('hidden');
       if (elements.customLanguageMode?.checked) {
         elements.customLanguageMode.checked = false;
         elements.customLanguageMode.dispatchEvent(new Event('change'));
-      }
-      if (elements.customLanguageMode) {
-        elements.customLanguageMode.disabled = true;
       }
     } else {
       // Show friends list and hide shares input
@@ -196,9 +210,8 @@ declare let currentLang: string;
       if (elements.friendsHint) {
         elements.friendsHint.textContent = t('friends_hint');
       }
-      if (elements.customLanguageMode) {
-        elements.customLanguageMode.disabled = false;
-      }
+      // Show custom language toggle
+      elements.customLanguageToggle?.classList.remove('hidden');
     }
   }
 
@@ -207,35 +220,20 @@ declare let currentLang: string;
       const container = document.querySelector('.container');
       if (elements.customLanguageMode?.checked) {
         container?.classList.add('custom-language-active');
-        // Disable anonymous mode (incompatible with per-friend languages)
-        if (elements.anonymousMode) {
-          elements.anonymousMode.disabled = true;
-        }
       } else {
         container?.classList.remove('custom-language-active');
         // Reset all friend languages to project default
         state.friends.forEach(f => { f.language = ''; });
         renderFriendsList();
-        if (elements.anonymousMode) {
-          elements.anonymousMode.disabled = false;
-        }
       }
     });
   }
 
   async function waitForWasm(): Promise<void> {
-    return new Promise((resolve) => {
-      const check = (): void => {
-        if (window.rememoryReady) {
-          state.wasmReady = true;
-          elements.loadingOverlay?.classList.add('hidden');
-          checkGenerateReady();
-          resolve();
-        } else {
-          setTimeout(check, 50);
-        }
-      };
-      check();
+    return window.rememoryUtils.waitForWasm().then(() => {
+      state.wasmReady = true;
+      elements.wasmLoadingIndicator?.classList.add('hidden');
+      checkGenerateReady();
     });
   }
 
@@ -322,7 +320,9 @@ declare let currentLang: string;
       { code: 'es', label: 'Español' },
       { code: 'de', label: 'Deutsch' },
       { code: 'fr', label: 'Français' },
-      { code: 'sl', label: 'Slovenščina' }
+      { code: 'sl', label: 'Slovenščina' },
+      { code: 'pt', label: 'Português' },
+      { code: 'zh-TW', label: '正體中文' }
     ];
     const langOptionsHtml = langOptions.map(o =>
       `<option value="${o.code}"${o.code === effectiveLang ? ' selected' : ''}>${escapeHtml(o.label)}</option>`
@@ -351,6 +351,7 @@ declare let currentLang: string;
       const target = e.target as HTMLInputElement;
       state.friends[index].name = target.value.trim();
       target.classList.remove('input-error');
+      updateThresholdVisibility();
       checkGenerateReady();
     });
 
@@ -408,7 +409,7 @@ declare let currentLang: string;
       for (let k = 2; k <= n; k++) {
         const option = document.createElement('option');
         option.value = String(k);
-        option.textContent = `${k} of ${n}`;
+        option.textContent = t('threshold_option', k, n);
         elements.thresholdSelect.appendChild(option);
       }
 
@@ -420,6 +421,16 @@ declare let currentLang: string;
         state.threshold = Math.min(2, n);
       }
     }
+
+    updateThresholdVisibility();
+  }
+
+  function updateThresholdVisibility(): void {
+    const show = state.anonymous
+      ? state.numShares >= 2
+      : state.friends.filter(f => f.name.trim().length > 0).length >= 2;
+    elements.thresholdSection?.classList.toggle('hidden', !show);
+    elements.thresholdGuidance?.classList.toggle('hidden', !show);
   }
 
   // ============================================
@@ -544,6 +555,8 @@ declare let currentLang: string;
   }
 
   function renderFilesPreview(): void {
+    elements.filesDropZone?.classList.toggle('loaded', state.files.length > 0);
+
     if (state.files.length === 0) {
       elements.filesPreview?.classList.add('hidden');
       elements.filesSummary?.classList.add('hidden');

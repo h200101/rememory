@@ -6,11 +6,13 @@
   "subtitle": "Wer einen Freund hat, hat einen Schatz.",
   "step1_title": "Freunde",
   "friends_hint": "Jede Person hier wird einen Teil deines Wiederherstellungsschlüssels aufbewahren",
-  "anonymous_label": "Anonym",
+  "mode_named": "Benannt",
+  "mode_anonymous": "Anonym",
   "anonymous_hint": "Teilnehmer kennen sich nicht",
   "num_shares_label": "Anzahl der Teile:",
   "add_friend": "Freund hinzufügen",
   "threshold_label": "Schwelle:",
+  "threshold_option": "{0} von {1}",
   "threshold_desc": "müssen zustimmen, um wiederherzustellen",
   "name_label": "Name",
   "contact_label": "Kontakt (optional)",
@@ -26,8 +28,6 @@
   "download_all_btn": "Alle Umschläge herunterladen",
   "download_yaml_btn": "project.yml speichern",
   "works_offline": "Funktioniert vollständig offline",
-  "need_help": "Brauchst du Hilfe?",
-  "download_cli": "CLI-Tool von GitHub herunterladen",
   "generating": "Erstellen...",
   "archiving": "Archivieren...",
   "encrypting": "Verschlüsseln...",
@@ -58,6 +58,10 @@
   "validation_guidance": "Jeder Freund braucht einen Namen, und mindestens eine Datei muss hinzugefügt werden.",
   "language_label": "Paket-Sprache",
 
-  "custom_language_label": "Eigene Sprache",
-  "remove": "Entfernen"
+  "custom_language_label": "Sprache ändern",
+  "remove": "Entfernen",
+  "threshold_guidance": "Überlege, wer zur gleichen Zeit erreichbar sein könnte. Eine niedrigere Zahl ist nachsichtiger, wenn jemand nicht verfügbar ist.",
+  "nav_about": "Über",
+  "nav_guide": "Anleitung",
+  "nav_recover": "Wiederherstellen"
 }

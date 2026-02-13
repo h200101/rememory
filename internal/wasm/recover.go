@@ -29,9 +29,10 @@ type ShareInfo struct {
 
 // ShareData is minimal data needed for combining.
 type ShareData struct {
-	Version int
-	Index   int
-	DataB64 string
+	Version   int
+	Index     int
+	Threshold int
+	DataB64   string
 }
 
 // parseShare extracts a share from text content (which might be a full README.txt).
@@ -88,6 +89,11 @@ func combineShares(shares []ShareData) (string, error) {
 		if shares[i].Version != shares[0].Version {
 			return "", fmt.Errorf("share %d has different version (v%d vs v%d) — all shares must be from the same bundle", i+1, shares[i].Version, shares[0].Version)
 		}
+	}
+
+	// Validate threshold is met (shares carry the threshold from parsing)
+	if shares[0].Threshold > 0 && len(shares) < shares[0].Threshold {
+		return "", fmt.Errorf("need at least %d shares to recover, got %d", shares[0].Threshold, len(shares))
 	}
 
 	// Convert to raw bytes for core.Combine
@@ -151,6 +157,7 @@ func extractBundle(zipData []byte) (*BundleContents, error) {
 
 	var readmeContent string
 	var manifestData []byte
+	var totalSize int64
 
 	for _, f := range r.File {
 		rc, err := f.Open()
@@ -158,10 +165,20 @@ func extractBundle(zipData []byte) (*BundleContents, error) {
 			return nil, fmt.Errorf("opening %s: %w", f.Name, err)
 		}
 
-		data, err := io.ReadAll(rc)
-		rc.Close()
+		limitedReader := io.LimitReader(rc, core.MaxFileSize+1)
+		data, err := io.ReadAll(limitedReader)
+		if closeErr := rc.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
 		if err != nil {
 			return nil, fmt.Errorf("reading %s: %w", f.Name, err)
+		}
+		if int64(len(data)) > core.MaxFileSize {
+			return nil, fmt.Errorf("file %s exceeds maximum allowed size (%d bytes)", f.Name, core.MaxFileSize)
+		}
+		totalSize += int64(len(data))
+		if totalSize > core.MaxTotalSize {
+			return nil, fmt.Errorf("bundle exceeds maximum total size (%d bytes)", core.MaxTotalSize)
 		}
 
 		switch {

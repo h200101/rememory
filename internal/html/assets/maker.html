@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-{{CSP_NONCE}}' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src blob: data:; connect-src blob:; form-action 'none';">
   <title>🧠 ReMemory - Create Recovery Bundles</title>
   <style>{{STYLES}}</style>
   <style>
@@ -99,6 +100,19 @@
       border-radius: 4px;
       font-size: 1rem;
       background: var(--paper-light);
+    }
+    .threshold-guidance {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      padding: 0 0.25rem;
+    }
+
+    /* Friends actions row */
+    .friends-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     /* Files preview */
@@ -205,7 +219,32 @@
     .card-header h2 {
       margin-bottom: 0;
     }
-    .anonymous-toggle {
+    .mode-tabs {
+      display: inline-flex;
+      background: var(--sand);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .mode-tab {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-tab:hover {
+      color: var(--text);
+    }
+    .mode-tab.active {
+      background: white;
+      color: var(--text);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .custom-language-toggle {
       font-size: 0.8rem;
       color: var(--text-secondary);
       cursor: pointer;
@@ -213,12 +252,12 @@
       align-items: center;
       gap: 0.35rem;
     }
-    .anonymous-toggle input {
+    .custom-language-toggle input {
       width: 14px;
       height: 14px;
       cursor: pointer;
     }
-    .anonymous-toggle:hover {
+    .custom-language-toggle:hover {
       color: var(--text);
     }
 
@@ -257,28 +296,18 @@
   <!-- Toast notifications container -->
   <div id="toast-container" class="toast-container" role="alert" aria-live="polite"></div>
 
-  <!-- Loading overlay -->
-  <div id="loading-overlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p style="margin-top: 1rem; color: var(--text-secondary);" data-i18n="loading">Loading...</p>
-  </div>
-
   <div class="container">
     <nav class="site-nav">
       <a href="index.html" class="logo">🧠 ReMemory</a>
       <div class="nav-links">
-        <a href="index.html">About</a>
-        <a href="docs.html">Guide</a>
-        <a href="recover.html">Recover</a>
+        <a href="index.html" data-i18n="nav_about">About</a>
+        <a href="docs.html" data-i18n="nav_guide">Guide</a>
+        <a href="recover.html" data-i18n="nav_recover">Recover</a>
         <a href="https://github.com/eljojo/rememory" target="_blank">GitHub</a>
       </div>
-      <div class="lang-toggle">
-        <button data-lang="en" class="active">EN</button>
-        <button data-lang="es">ES</button>
-        <button data-lang="de">DE</button>
-        <button data-lang="fr">FR</button>
-        <button data-lang="sl">SL</button>
-      </div>
+      <select class="lang-select" id="lang-select">
+        {{LANG_OPTIONS}}
+      </select>
     </nav>
 
     <div class="page-intro">
@@ -322,15 +351,9 @@
     <div class="card">
       <div class="card-header">
         <h2><span class="step-number">1</span> <span data-i18n="step1_title">Friends</span></h2>
-        <div style="display:flex;gap:1rem;align-items:center">
-          <label class="anonymous-toggle">
-            <input type="checkbox" id="anonymous-mode">
-            <span data-i18n="anonymous_label">Anonymous</span>
-          </label>
-          <label class="anonymous-toggle">
-            <input type="checkbox" id="custom-language-mode">
-            <span data-i18n="custom_language_label">Custom language</span>
-          </label>
+        <div class="mode-tabs" id="mode-tabs">
+          <button type="button" class="mode-tab active" data-mode="named" data-i18n="mode_named">Named</button>
+          <button type="button" class="mode-tab" data-mode="anonymous" data-i18n="mode_anonymous">Anonymous</button>
         </div>
       </div>
       <p class="hint" id="friends-hint" data-i18n="friends_hint">Each person here will hold one piece of your recovery key</p>
@@ -345,16 +368,23 @@
       <div id="friends-section">
         <div id="friends-list"></div>
 
-        <button id="add-friend-btn" class="btn btn-secondary" type="button">
-          <span>+</span> <span data-i18n="add_friend">Add Friend</span>
-        </button>
+        <div class="friends-actions">
+          <button id="add-friend-btn" class="btn btn-secondary" type="button">
+            <span>+</span> <span data-i18n="add_friend">Add Friend</span>
+          </button>
+          <label class="custom-language-toggle" id="custom-language-toggle">
+            <input type="checkbox" id="custom-language-mode">
+            <span data-i18n="custom_language_label">Change language</span>
+          </label>
+        </div>
       </div>
 
-      <div class="threshold-selector">
+      <div id="threshold-section" class="threshold-selector hidden">
         <label for="threshold-select" data-i18n="threshold_label">Threshold:</label>
         <select id="threshold-select"></select>
         <span data-i18n="threshold_desc">must agree to recover</span>
       </div>
+      <p id="threshold-guidance" class="threshold-guidance hidden" data-i18n="threshold_guidance">Think about who might be reachable at the same time. A lower number is more forgiving if someone is unavailable.</p>
 
       <details id="import-section" class="import-section">
         <summary data-i18n="import_summary">Import contacts from existing project.yml</summary>
@@ -388,6 +418,13 @@
         <span data-i18n="generate_btn">Generate Bundles</span>
       </button>
 
+      <p id="wasm-loading-indicator" class="wasm-loading-hint">
+        <span class="spinner-small"></span>
+        <span data-i18n="loading">Loading...</span>
+      </p>
+
+      <div id="wasm-error-container" class="hidden"></div>
+
       <div id="progress-bar" class="progress-bar hidden">
         <div class="fill" style="width: 0%"></div>
       </div>
@@ -413,7 +450,7 @@
   </footer>
 
   <!-- Translations -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     const translations = {{TRANSLATIONS}};
 
     let currentLang = 'en';
@@ -430,10 +467,9 @@
       currentLang = lang;
       localStorage.setItem('rememory-lang', lang);
 
-      // Update toggle buttons
-      document.querySelectorAll('.lang-toggle button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-      });
+      // Update select
+      const sel = document.getElementById('lang-select');
+      if (sel) sel.value = lang;
 
       // Update all translatable elements
       document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -459,38 +495,37 @@
     // Set initial language immediately
     (function() {
       const saved = localStorage.getItem('rememory-lang');
-      const browserLang = navigator.language.split('-')[0];
-      currentLang = saved || (['es', 'de', 'fr'].includes(browserLang) ? browserLang : 'en');
+      const langs = {{LANG_DETECT}};
+      const detected = navigator.languages.find((l) => langs.includes(l))
+        || navigator.languages.map((l) => l.split('-')[0]).find((l) => langs.includes(l));
+      currentLang = saved || detected || 'en';
     })();
 
-    // Initialize language toggle buttons after DOM is ready
+    // Initialize language select after DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       setLanguage(currentLang);
 
-      // Add click handlers
-      document.querySelectorAll('.lang-toggle button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          setLanguage(btn.dataset.lang);
-        });
+      document.getElementById('lang-select')?.addEventListener('change', (e) => {
+        setLanguage(e.target.value);
       });
     });
   </script>
 
   <!-- Go WASM runtime -->
-  <script>{{WASM_EXEC}}</script>
+  <script nonce="{{CSP_NONCE}}">{{WASM_EXEC}}</script>
 
   <!-- Embedded WASM binary (base64) -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     window.WASM_BINARY = "{{WASM_BASE64}}";
     window.VERSION = "{{VERSION}}";
     window.GITHUB_URL = "{{GITHUB_URL}}";
   </script>
 
   <!-- Application logic -->
-  <script>{{CREATE_APP_JS}}</script>
+  <script nonce="{{CSP_NONCE}}">{{CREATE_APP_JS}}</script>
 
   <!-- Load WASM from embedded gzip-compressed binary -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     (async function() {
       const go = new Go();
       try {
@@ -531,19 +566,23 @@
         go.run(result.instance);
       } catch (err) {
         // Show user-friendly error with guidance
-        document.getElementById('loading-overlay').innerHTML = `
-          <div class="loading-error">
-            <div class="loading-error-icon">⚠️</div>
-            <div class="loading-error-title">Could not load the bundle creator</div>
-            <div class="loading-error-message">
-              The bundle creator did not load. This can happen with older browsers or certain privacy settings.
+        const indicator = document.getElementById('wasm-loading-indicator');
+        if (indicator) indicator.classList.add('hidden');
+        const errorContainer = document.getElementById('wasm-error-container');
+        if (errorContainer) {
+          errorContainer.classList.remove('hidden');
+          errorContainer.innerHTML = `
+            <div class="wasm-fallback">
+              <p><strong>Could not load the bundle creator</strong></p>
+              <p>This can happen with older browsers or certain privacy settings.</p>
+              <div class="loading-error-actions">
+                <button class="btn btn-primary" id="reload-page-btn">Reload page</button>
+                <a href="https://github.com/eljojo/rememory" class="btn btn-secondary" target="_blank">Use CLI tool instead</a>
+              </div>
             </div>
-            <div class="loading-error-actions">
-              <button class="btn btn-primary" onclick="window.location.reload()">Reload page</button>
-              <a href="https://github.com/eljojo/rememory" class="btn btn-secondary" target="_blank">Use CLI tool instead</a>
-            </div>
-          </div>
-        `;
+          `;
+          document.getElementById('reload-page-btn')?.addEventListener('click', () => window.location.reload());
+        }
       }
     })();
   </script>

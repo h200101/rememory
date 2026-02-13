@@ -19,6 +19,7 @@ export interface ParsedShare {
 export interface ShareInput {
   version: number;
   index: number;
+  threshold: number;
   dataB64: string;
 }
 
@@ -205,6 +206,7 @@ declare global {
       toast: ToastManager;
       showInlineError: (target: HTMLElement, message: string, guidance?: string) => void;
       clearInlineError: (target: HTMLElement) => void;
+      waitForWasm: (timeoutMs?: number) => Promise<void>;
     };
 
     // UI update callback

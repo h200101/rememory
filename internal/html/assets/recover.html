@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-{{CSP_NONCE}}' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src blob: data:; connect-src blob:; form-action 'none';">
   <title>ReMemory Recovery Tool</title>
   <style>{{STYLES}}</style>
 </head>
@@ -25,31 +26,21 @@
     </div>
   </div>
 
-  <!-- Loading overlay -->
-  <div id="loading-overlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p style="margin-top: 1rem; color: var(--text-secondary);" data-i18n="loading">Loading...</p>
-  </div>
-
   <div class="container">
     <nav class="site-nav">
       <a href="index.html" class="logo">🧠 ReMemory</a>
       <div class="nav-links" id="nav-links-standalone">
-        <a href="index.html">About</a>
-        <a href="maker.html">Create Bundles</a>
-        <a href="docs.html#recovering">Guide</a>
+        <a href="index.html" data-i18n="nav_about">About</a>
+        <a href="maker.html" data-i18n="nav_create">Create Bundles</a>
+        <a href="docs.html" data-i18n="nav_guide">Guide</a>
         <a href="https://github.com/eljojo/rememory" target="_blank">GitHub</a>
       </div>
       <div class="nav-links hidden" id="nav-links-bundle">
-        <a href="https://eljojo.github.io/rememory/docs#recovering" target="_blank">Guide</a>
+        <a href="https://eljojo.github.io/rememory/docs" target="_blank" data-i18n="nav_guide">Guide</a>
       </div>
-      <div class="lang-toggle">
-        <button data-lang="en" class="active">EN</button>
-        <button data-lang="es">ES</button>
-        <button data-lang="de">DE</button>
-        <button data-lang="fr">FR</button>
-        <button data-lang="sl">SL</button>
-      </div>
+      <select class="lang-select" id="lang-select">
+        {{LANG_OPTIONS}}
+      </select>
     </nav>
 
     <div class="page-intro">
@@ -115,6 +106,11 @@
           <span>&#128275;</span> <span data-i18n="decrypt_btn">Unlock & Recover</span>
         </button>
 
+        <p id="wasm-loading-indicator" class="wasm-loading-hint">
+          <span class="spinner-small"></span>
+          <span data-i18n="loading">Loading...</span>
+        </p>
+
         <div id="progress-bar" class="progress-bar hidden">
           <div class="fill" style="width: 0%"></div>
         </div>
@@ -142,7 +138,7 @@
   </footer>
 
   <!-- Translations -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     const translations = {{TRANSLATIONS}};
 
     let currentLang = 'en';
@@ -159,10 +155,9 @@
       currentLang = lang;
       localStorage.setItem('rememory-lang', lang);
 
-      // Update toggle buttons
-      document.querySelectorAll('.lang-toggle button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-      });
+      // Update select
+      const sel = document.getElementById('lang-select');
+      if (sel) sel.value = lang;
 
       // Update all translatable elements
       document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -183,11 +178,13 @@
     // Set initial language immediately (before app.js runs)
     (function() {
       const saved = localStorage.getItem('rememory-lang');
-      const browserLang = navigator.language.split('-')[0];
-      currentLang = saved || (['es', 'de', 'fr', 'sl'].includes(browserLang) ? browserLang : 'en');
+      const langs = {{LANG_DETECT}};
+      const detected = navigator.languages.find((l) => langs.includes(l))
+        || navigator.languages.map((l) => l.split('-')[0]).find((l) => langs.includes(l));
+      currentLang = saved || detected || 'en';
     })();
 
-    // Initialize language toggle buttons after DOM is ready
+    // Initialize language select after DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       // If personalized with a language preference and no saved preference, use it
       if (window.PERSONALIZATION && window.PERSONALIZATION.language && !localStorage.getItem('rememory-lang')) {
@@ -202,34 +199,30 @@
 
       setLanguage(currentLang);
 
-      // Add click handlers
-      document.querySelectorAll('.lang-toggle button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          setLanguage(btn.dataset.lang);
-          // Re-render dynamic content when language changes
-          if (typeof window.rememoryUpdateUI === 'function') {
-            window.rememoryUpdateUI();
-          }
-        });
+      document.getElementById('lang-select')?.addEventListener('change', (e) => {
+        setLanguage(e.target.value);
+        if (typeof window.rememoryUpdateUI === 'function') {
+          window.rememoryUpdateUI();
+        }
       });
     });
   </script>
 
   <!-- Go WASM runtime -->
-  <script>{{WASM_EXEC}}</script>
+  <script nonce="{{CSP_NONCE}}">{{WASM_EXEC}}</script>
 
   <!-- Embedded WASM binary (base64) -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     window.WASM_BINARY = "{{WASM_BASE64}}";
   </script>
 
   <!-- Personalization data (embedded for this specific friend) -->
-  <script>
+  <script nonce="{{CSP_NONCE}}">
     window.PERSONALIZATION = {{PERSONALIZATION_DATA}};
   </script>
 
   <!-- Application logic (must come after WASM_BINARY and PERSONALIZATION) -->
   <!-- App.js handles WASM loading with gzip decompression -->
-  <script>{{APP_JS}}</script>
+  <script nonce="{{CSP_NONCE}}">{{APP_JS}}</script>
 </body>
 </html>

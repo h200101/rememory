@@ -3,6 +3,7 @@ package translations
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -25,6 +26,9 @@ func TestAllJSONFilesParseCorrectly(t *testing.T) {
 }
 
 func TestAllLanguagesHaveSameKeys(t *testing.T) {
+	if os.Getenv("REMEMORY_CHECK_TRANSLATIONS") == "" {
+		t.Skip("Skipping translation parity check (set REMEMORY_CHECK_TRANSLATIONS=1 or run 'make check-translations')")
+	}
 	for _, component := range []string{"recover", "maker", "readme"} {
 		t.Run(component, func(t *testing.T) {
 			enKeys, err := GetComponentKeys(component)
@@ -69,6 +73,61 @@ func TestAllLanguagesHaveSameKeys(t *testing.T) {
 	}
 }
 
+func TestLangNamesMatchesLanguages(t *testing.T) {
+	if len(LangNames) != len(Languages) {
+		t.Fatalf("LangNames has %d entries but Languages has %d", len(LangNames), len(Languages))
+	}
+	for i, entry := range LangNames {
+		if entry[0] != Languages[i] {
+			t.Errorf("LangNames[%d] code %q != Languages[%d] %q", i, entry[0], i, Languages[i])
+		}
+		if entry[1] == "" {
+			t.Errorf("LangNames[%d] (%s) has empty display name", i, entry[0])
+		}
+	}
+}
+
+func TestLangSelectOptions(t *testing.T) {
+	opts := LangSelectOptions()
+
+	// Should contain an option for every language
+	for _, entry := range LangNames {
+		expected := `<option value="` + entry[0] + `">` + entry[1] + `</option>`
+		if !strings.Contains(opts, expected) {
+			t.Errorf("LangSelectOptions() missing %s", expected)
+		}
+	}
+
+	// Should start with English (no leading newline/whitespace)
+	if !strings.HasPrefix(opts, `<option value="en">`) {
+		t.Errorf("LangSelectOptions() should start with English option, got: %s", opts[:50])
+	}
+}
+
+func TestLangDetectJS(t *testing.T) {
+	js := LangDetectJS()
+
+	// Should be a JS array
+	if !strings.HasPrefix(js, "[") || !strings.HasSuffix(js, "]") {
+		t.Errorf("LangDetectJS() should be a JS array, got: %s", js)
+	}
+
+	// Should not contain English (it's the fallback)
+	if strings.Contains(js, "'en'") {
+		t.Error("LangDetectJS() should not contain 'en' (English is the fallback)")
+	}
+
+	// Should contain all non-English languages
+	for _, entry := range LangNames {
+		if entry[0] == "en" {
+			continue
+		}
+		if !strings.Contains(js, "'"+entry[0]+"'") {
+			t.Errorf("LangDetectJS() missing language %s", entry[0])
+		}
+	}
+}
+
 func TestGetTranslationsJSProducesValidJS(t *testing.T) {
 	for _, component := range []string{"recover", "maker"} {
 		t.Run(component, func(t *testing.T) {
@@ -81,7 +140,7 @@ func TestGetTranslationsJSProducesValidJS(t *testing.T) {
 			}
 
 			for _, lang := range Languages {
-				if !strings.Contains(js, lang+": {") {
+				if !strings.Contains(js, "\""+lang+"\": {") {
 					t.Errorf("GetTranslationsJS(%s) missing language %s", component, lang)
 				}
 			}
@@ -218,16 +277,15 @@ func TestMakerHasExpectedKeys(t *testing.T) {
 
 func TestReadmeHasExpectedKeys(t *testing.T) {
 	expectedKeys := []string{
-		"title", "for", "warning_cannot_alone",
-		"warning_need_friends", "warning_need_shares",
-		"warning_confidential", "warning_keep_safe",
+		"title", "for", "warning_title",
+		"warning_message_friends", "warning_message_shares",
 		"what_is_this", "what_bundle_for", "what_one_of", "what_threshold",
 		"other_holders", "contact_label",
 		"recover_browser", "recover_step1", "recover_share_loaded",
 		"recover_step2", "recover_step2_drag", "recover_step2_click",
 		"recover_offline", "recover_cli", "recover_cli_hint", "recover_cli_usage",
 		"your_share", "recovery_words_title", "recovery_words_hint",
-		"machine_readable", "metadata_footer",
+		"machine_readable",
 		"readme_filename",
 	}
 
